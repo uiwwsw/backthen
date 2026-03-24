@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <title>몇 년 전 오늘 아이콘</title>
+  <desc>신문 기록과 시간을 상징하는 파비콘</desc>
+  <rect width="256" height="256" rx="56" fill="#A91212" />
+  <g transform="translate(46 28)" stroke="#F4ECDF" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 12H114L150 48V180C150 192.15 140.15 202 128 202H28C15.85 202 6 192.15 6 180V34C6 21.85 15.85 12 28 12Z" stroke-width="12" />
+    <path d="M114 12V36C114 43.73 120.27 50 128 50H150" stroke-width="12" />
+    <circle cx="58" cy="86" r="26" stroke-width="12" />
+    <path d="M58 86V70" stroke-width="10" />
+    <path d="M58 86L74 96" stroke-width="10" />
+    <path d="M102 78H126" stroke-width="10" />
+    <path d="M102 100H122" stroke-width="10" />
+    <path d="M34 144H126" stroke-width="10" />
+  </g>
+</svg>

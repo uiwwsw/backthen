@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #f5efe4;
+  --paper-top: #f3e8d2;
+  --paper-bottom: #e7d8bd;
+  --shell-top: #cab999;
+  --shell-bottom: #ae9c81;
+  --ink: #111111;
+  --muted-ink: #3f3b36;
+  --tabloid-red: #cf1020;
+  --tabloid-red-strong: #b40e1b;
+  --accent-ink: #ffffff;
+  --photo-shadow: rgba(10, 10, 10, 0.54);
+  --line: rgba(17, 17, 17, 0.18);
+  --line-soft: rgba(17, 17, 17, 0.12);
+  --frame-line: rgba(17, 17, 17, 0.15);
+  --surface: rgba(255, 255, 255, 0.62);
+  --surface-alt: #f1e3c4;
+  --surface-alt-2: #f2e2c1;
+  --surface-muted: #ece0c8;
+  --surface-card: #f6eed7;
+  --surface-strong: rgba(17, 17, 17, 0.035);
+  --surface-tag: rgba(255, 255, 255, 0.68);
+  --banner: #111111;
+  --banner-ink: #ffffff;
+  --banner-ink-muted: rgba(255, 255, 255, 0.72);
+  --banner-line: rgba(255, 255, 255, 0.15);
+  --display-ghost: rgba(255, 255, 255, 0.16);
+  --selection: rgba(169, 18, 18, 0.18);
+  --paper-edge: rgba(131, 100, 63, 0.08);
+  --paper-edge-strong: rgba(131, 100, 63, 0.1);
+  --paper-spot-a: rgba(124, 92, 50, 0.08);
+  --paper-spot-b: rgba(101, 74, 39, 0.08);
+  --paper-vignette: rgba(77, 55, 24, 0.05);
+  --paper-shadow-soft: rgba(0, 0, 0, 0.05);
+  --frame-shadow: rgba(33, 23, 10, 0.24);
+  --archive-spot-a: rgba(145, 109, 63, 0.08);
+  --archive-spot-b: rgba(122, 89, 48, 0.08);
+  --archive-vignette: rgba(80, 57, 27, 0.05);
+  --archive-shadow: rgba(108, 79, 44, 0.05);
+  --photo-fill-start: rgba(17, 17, 17, 0.04);
+  --photo-fill-end: rgba(17, 17, 17, 0.42);
+  --photo-fallback-start: rgba(17, 17, 17, 0.16);
+  --photo-fallback-end: rgba(17, 17, 17, 0.58);
+  --photo-overlay-strong: rgba(17, 17, 17, 0.7);
+  --photo-overlay-soft: rgba(17, 17, 17, 0.12);
+  --font-newspaper: var(--font-noto-serif-kr);
+  --font-display: var(--font-noto-serif-kr);
+  --font-tabloid: var(--font-noto-serif-kr);
+  --font-interface: var(--font-noto-serif-kr);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--shell-bottom);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%),
+    linear-gradient(180deg, var(--shell-top) 0%, var(--shell-bottom) 100%);
+  color: var(--ink);
+  font-family: var(--font-interface), serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+.hangul-keep {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  line-break: strict;
+  hyphens: none;
+}
+
+::selection {
+  background: var(--selection);
+}
+
+.paper-frame {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.06) 10%, transparent 24%),
+    linear-gradient(90deg, var(--paper-edge), transparent 7%, transparent 93%, var(--paper-edge-strong)),
+    url('/textures/paper-grain.svg'),
+    linear-gradient(180deg, var(--paper-top) 0%, var(--paper-bottom) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 26px 90px var(--frame-shadow);
+}
+
+.paper-frame::before {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 8%, transparent 92%, var(--paper-vignette)),
+    radial-gradient(circle at 14% 18%, var(--paper-spot-a), transparent 18%),
+    radial-gradient(circle at 86% 82%, var(--paper-spot-b), transparent 22%),
+    radial-gradient(circle at 50% 100%, var(--paper-shadow-soft), transparent 28%);
+  content: '';
+  pointer-events: none;
+}
+
+.paper-frame::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(17, 17, 17, 0.05), transparent 10%, transparent 90%, rgba(17, 17, 17, 0.06)),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 6px),
+    url('/textures/halftone-dots.svg');
+  opacity: 0.14;
+  content: '';
+  pointer-events: none;
+}
+
+.archive-panel {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.08) 16%, transparent 100%),
+    url('/textures/paper-grain.svg'),
+    linear-gradient(180deg, color-mix(in srgb, var(--paper-top) 70%, white) 0%, color-mix(in srgb, var(--paper-bottom) 92%, white) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.44),
+    inset 0 -20px 32px var(--archive-shadow);
+}
+
+.archive-panel::before {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 14%, var(--archive-spot-a), transparent 18%),
+    radial-gradient(circle at 88% 84%, var(--archive-spot-b), transparent 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%, transparent 82%, var(--archive-vignette));
+  content: '';
+  pointer-events: none;
+}
+
+.archive-panel > * {
+  position: relative;
+  z-index: 1;
+}
