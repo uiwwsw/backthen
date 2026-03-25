@@ -5,6 +5,7 @@ import {
   candidateFromArticleUrl,
   collectArticleAnchors,
   fetchHtml,
+  normalizeHeadline,
   padDate,
   resolveUrl,
   stripHtml,
@@ -47,13 +48,13 @@ function parseSearchPageCandidates(html: string, endpoint: string, input: Source
 
   for (const [index, card] of cards.entries()) {
     const url = resolveUrl(endpoint, card.match(/<a href="([^"]*\/article\/[^"]+)"/)?.[1] ?? '');
-    const title = stripHtml(card.match(/<h2 class="headline">[\s\S]*?<a [^>]*>([\s\S]*?)<\/a>/)?.[1] ?? '');
+    const rawTitle = stripHtml(card.match(/<h2 class="headline">[\s\S]*?<a [^>]*>([\s\S]*?)<\/a>/)?.[1] ?? '');
     const excerpt = stripHtml(card.match(/<p class="description[^"]*">([\s\S]*?)<\/p>/)?.[1] ?? '');
     const sourceText = stripHtml(card.match(/<p class="source">([\s\S]*?)<\/p>/)?.[1] ?? '');
     const dateText = stripHtml(card.match(/<p class="date">([\s\S]*?)<\/p>/)?.[1] ?? '');
     const imageUrl = resolveUrl(endpoint, card.match(/<img [^>]*src="([^"]+)"/)?.[1] ?? '') ?? null;
 
-    if (!url || !title || !sourceText.includes('중앙일보')) {
+    if (!url || !rawTitle || !sourceText.includes('중앙일보')) {
       continue;
     }
 
@@ -61,9 +62,12 @@ function parseSearchPageCandidates(html: string, endpoint: string, input: Source
       continue;
     }
 
+    const title = normalizeHeadline(rawTitle);
+
     candidates.push({
       sourceName: 'joongang',
       title,
+      rawTitle,
       url,
       publishedAt,
       excerpt: excerpt || null,

@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import type { ArticleCandidate, IssueOfDay, StoredIssueCandidateRow, StoredIssueRow } from '@/lib/db/types';
 import { pickRelatedArticles, pickSecondaryArticles } from '@/lib/news/rankIssueCandidates';
+import { normalizeHeadline } from '@/lib/sources/shared';
 
 let poolState: Pool | null | undefined;
 let schemaPromise: Promise<void> | null = null;
@@ -44,6 +45,7 @@ async function ensureSchema() {
           year INTEGER NOT NULL,
           month_day CHAR(5) NOT NULL,
           headline TEXT NOT NULL,
+          raw_headline TEXT,
           summary TEXT NOT NULL,
           source_name TEXT NOT NULL,
           source_url TEXT NOT NULL,
@@ -63,6 +65,7 @@ async function ensureSchema() {
           issue_id BIGINT NOT NULL REFERENCES issues_of_day(id) ON DELETE CASCADE,
           source_name TEXT NOT NULL,
           title TEXT NOT NULL,
+          raw_title TEXT,
           url TEXT NOT NULL,
           published_at TEXT NOT NULL,
           excerpt TEXT,
@@ -78,6 +81,7 @@ async function ensureSchema() {
           year INTEGER NOT NULL,
           month_day CHAR(5) NOT NULL,
           headline TEXT NOT NULL,
+          raw_headline TEXT,
           summary TEXT NOT NULL,
           source_name TEXT NOT NULL,
           source_url TEXT NOT NULL,
@@ -91,6 +95,15 @@ async function ensureSchema() {
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           UNIQUE (year, month_day)
         );
+
+        ALTER TABLE issues_of_day
+          ADD COLUMN IF NOT EXISTS raw_headline TEXT;
+
+        ALTER TABLE issue_source_candidates
+          ADD COLUMN IF NOT EXISTS raw_title TEXT;
+
+        ALTER TABLE editorial_overrides
+          ADD COLUMN IF NOT EXISTS raw_headline TEXT;
       `)
       .then(() => undefined);
   }
@@ -99,10 +112,13 @@ async function ensureSchema() {
 }
 
 function mapIssue(row: StoredIssueRow): IssueOfDay {
+  const rawHeadline = row.raw_headline ?? row.headline;
+
   return {
     year: row.year,
     monthDay: row.month_day,
-    headline: row.headline,
+    headline: normalizeHeadline(row.headline),
+    rawHeadline,
     summary: row.summary,
     sourceName: row.source_name,
     sourceUrl: row.source_url,
@@ -118,9 +134,12 @@ function mapIssue(row: StoredIssueRow): IssueOfDay {
 }
 
 function mapCandidate(row: StoredIssueCandidateRow): ArticleCandidate {
+  const rawTitle = row.raw_title ?? row.title;
+
   return {
     sourceName: row.source_name,
-    title: row.title,
+    title: normalizeHeadline(row.title),
+    rawTitle,
     url: row.url,
     publishedAt: row.published_at,
     excerpt: row.excerpt,
@@ -143,7 +162,7 @@ export async function getIssueRecord(year: number, monthDay: string) {
 
   const result = await pool.query<StoredIssueRow>(
     `
-      SELECT year, month_day, headline, summary, source_name, source_url, published_at,
+      SELECT year, month_day, headline, raw_headline, summary, source_name, source_url, published_at,
              background_image_url, background_image_credit, image_status, keywords, importance_score
       FROM issues_of_day
       WHERE year = $1 AND month_day = $2
@@ -161,7 +180,7 @@ export async function getIssueRecord(year: number, monthDay: string) {
   const issue = mapIssue(row);
   const candidateResult = await pool.query<StoredIssueCandidateRow>(
     `
-      SELECT c.source_name, c.title, c.url, c.published_at, c.excerpt, c.image_url,
+      SELECT c.source_name, c.title, c.raw_title, c.url, c.published_at, c.excerpt, c.image_url,
              c.section, c.duplicate_cluster_key, c.source_weight, c.event_score
       FROM issue_source_candidates c
       JOIN issues_of_day i ON i.id = c.issue_id
@@ -174,6 +193,7 @@ export async function getIssueRecord(year: number, monthDay: string) {
   issue.secondaryArticles = pickSecondaryArticles(candidates, {
     sourceName: issue.sourceName,
     title: issue.headline,
+    rawTitle: issue.rawHeadline ?? issue.headline,
     url: issue.sourceUrl,
     publishedAt: issue.publishedAt,
     excerpt: null,
@@ -188,6 +208,7 @@ export async function getIssueRecord(year: number, monthDay: string) {
     {
       sourceName: issue.sourceName,
       title: issue.headline,
+      rawTitle: issue.rawHeadline ?? issue.headline,
       url: issue.sourceUrl,
       publishedAt: issue.publishedAt,
       excerpt: null,
@@ -217,7 +238,7 @@ export async function getEditorialOverride(year: number, monthDay: string) {
 
   const result = await pool.query<StoredIssueRow>(
     `
-      SELECT year, month_day, headline, summary, source_name, source_url, published_at,
+      SELECT year, month_day, headline, raw_headline, summary, source_name, source_url, published_at,
              background_image_url, background_image_credit, image_status, keywords, importance_score
       FROM editorial_overrides
       WHERE year = $1 AND month_day = $2
@@ -246,13 +267,14 @@ export async function storeIssueRecord(issue: IssueOfDay, candidates: ArticleCan
     const upserted = await client.query<{ id: string }>(
       `
         INSERT INTO issues_of_day (
-          year, month_day, headline, summary, source_name, source_url, published_at,
+          year, month_day, headline, raw_headline, summary, source_name, source_url, published_at,
           background_image_url, background_image_credit, image_status, keywords, importance_score, updated_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12, NOW())
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb, $13, NOW())
         ON CONFLICT (year, month_day)
         DO UPDATE SET
           headline = EXCLUDED.headline,
+          raw_headline = EXCLUDED.raw_headline,
           summary = EXCLUDED.summary,
           source_name = EXCLUDED.source_name,
           source_url = EXCLUDED.source_url,
@@ -269,6 +291,7 @@ export async function storeIssueRecord(issue: IssueOfDay, candidates: ArticleCan
         issue.year,
         issue.monthDay,
         issue.headline,
+        issue.rawHeadline ?? issue.headline,
         issue.summary,
         issue.sourceName,
         issue.sourceUrl,
@@ -289,15 +312,16 @@ export async function storeIssueRecord(issue: IssueOfDay, candidates: ArticleCan
       await client.query(
         `
           INSERT INTO issue_source_candidates (
-            issue_id, source_name, title, url, published_at, excerpt, image_url,
+            issue_id, source_name, title, raw_title, url, published_at, excerpt, image_url,
             section, duplicate_cluster_key, source_weight, event_score
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         `,
         [
           issueId,
           candidate.sourceName,
           candidate.title,
+          candidate.rawTitle ?? candidate.title,
           candidate.url,
           candidate.publishedAt,
           candidate.excerpt,

@@ -5,6 +5,7 @@ import {
   candidateFromArticleUrl,
   collectArticleAnchors,
   fetchHtml,
+  normalizeHeadline,
   padDate,
   resolveUrl,
   stripHtml,
@@ -104,19 +105,21 @@ function parseTextArchiveCandidates(html: string, year: number, month: number, d
   const candidates: ArticleCandidate[] = [];
 
   for (const [index, block] of blocks.entries()) {
-    const title = stripHtml(block.match(/<span class="list_tit">([\s\S]*?)<\/span>/i)?.[1] ?? '').replace(/[;；]+$/g, '').trim();
+    const rawTitle = stripHtml(block.match(/<span class="list_tit">([\s\S]*?)<\/span>/i)?.[1] ?? '').replace(/[;；]+$/g, '').trim();
     const meta = stripHtml(block.match(/<div class="gigoja">([\s\S]*?)<\/div>/i)?.[1] ?? '');
 
-    if (!title || shouldSkipArchiveHeadline(title)) {
+    if (!rawTitle || shouldSkipArchiveHeadline(rawTitle)) {
       continue;
     }
 
+    const title = normalizeHeadline(rawTitle);
     const { pageNumber, section } = parseChosunTextSection(meta);
     const position = Math.min(index, 12);
 
     candidates.push({
       sourceName: 'chosun',
       title,
+      rawTitle,
       url: buildChosunTextCandidateUrl(year, month, day, pageNumber, index),
       publishedAt,
       excerpt: null,
@@ -154,15 +157,18 @@ function parseArchiveCandidates(html: string, year: number, month: number, day: 
 
     for (const articleMatch of articleMatches) {
       const [, href, rawTitle] = articleMatch;
-      const title = stripHtml(rawTitle).replace(/[;；]+$/g, '').trim();
+      const cleanedRawTitle = stripHtml(rawTitle).replace(/[;；]+$/g, '').trim();
 
-      if (!title || shouldSkipArchiveHeadline(title)) {
+      if (!cleanedRawTitle || shouldSkipArchiveHeadline(cleanedRawTitle)) {
         continue;
       }
+
+      const title = normalizeHeadline(cleanedRawTitle);
 
       candidates.push({
         sourceName: 'chosun',
         title,
+        rawTitle: cleanedRawTitle,
         url: resolveUrl('https://archive.chosun.com', href) ?? href,
         publishedAt,
         excerpt: null,
@@ -182,17 +188,19 @@ function parseArchiveCandidates(html: string, year: number, month: number, day: 
 
     const legacyTitles = getLegacyArchiveTitles(listHtml);
 
-    for (const [legacyPosition, title] of legacyTitles.entries()) {
-      if (shouldSkipArchiveHeadline(title)) {
+    for (const [legacyPosition, rawTitle] of legacyTitles.entries()) {
+      if (shouldSkipArchiveHeadline(rawTitle)) {
         continue;
       }
 
+      const title = normalizeHeadline(rawTitle);
       const fallbackUrl =
         pageUrl ? `${pageUrl}#article-${pageNumber}-${legacyPosition + 1}` : `https://archive.chosun.com/#${year}${padDate(month)}${padDate(day)}-${pageNumber}-${legacyPosition + 1}`;
 
       candidates.push({
         sourceName: 'chosun',
         title,
+        rawTitle,
         url: fallbackUrl,
         publishedAt,
         excerpt: null,

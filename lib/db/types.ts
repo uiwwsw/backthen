@@ -6,6 +6,7 @@ export type IssueOfDay = {
   year: number;
   monthDay: string;
   headline: string;
+  rawHeadline?: string | null;
   summary: string;
   sourceName: SourceName;
   sourceUrl: string;
@@ -22,6 +23,7 @@ export type IssueOfDay = {
 export type ArticleCandidate = {
   sourceName: SourceName;
   title: string;
+  rawTitle?: string | null;
   url: string;
   publishedAt: string;
   excerpt: string | null;
@@ -36,6 +38,7 @@ export type StoredIssueRow = {
   year: number;
   month_day: string;
   headline: string;
+  raw_headline: string | null;
   summary: string;
   source_name: SourceName;
   source_url: string;
@@ -50,6 +53,7 @@ export type StoredIssueRow = {
 export type StoredIssueCandidateRow = {
   source_name: SourceName;
   title: string;
+  raw_title: string | null;
   url: string;
   published_at: string;
   excerpt: string | null;

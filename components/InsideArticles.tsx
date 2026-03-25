@@ -1,3 +1,4 @@
+import { HeadlineText } from '@/components/HeadlineText';
 import type { ArticleCandidate, SourceName } from '@/lib/db/types';
 import { formatPublishedAt, getSourceLabel } from '@/lib/date';
 
@@ -37,7 +38,7 @@ export function InsideArticles({ articles, primarySource }: InsideArticlesProps)
           const summary = article ? getArticleSummary(article) : null;
 
           return (
-            <article key={`${source}-${article?.url ?? 'empty'}`} className="flex h-full flex-col border-2 border-ink bg-[color:var(--surface-card)] p-4">
+            <article key={`${source}-${article?.url ?? 'empty'}`} className="flex min-w-0 h-full flex-col border-2 border-ink bg-[color:var(--surface-card)] p-4">
               <div className="flex flex-wrap items-start justify-between gap-3 border-b border-ink/20 pb-3">
                 <div>
                   <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-ink">
@@ -53,13 +54,13 @@ export function InsideArticles({ articles, primarySource }: InsideArticlesProps)
               </div>
 
               {article ? (
-                <a href={article.url} rel="noreferrer" target="_blank" className="mt-4 block">
-                  <h2 className="hangul-keep text-balance font-tabloid text-[1.28rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink underline-offset-4 transition hover:underline">
-                    {article.title}
+                <a href={article.url} rel="noreferrer" target="_blank" className="mt-4 block min-w-0">
+                  <h2 className="headline-wrap text-balance font-tabloid text-[1.28rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink underline-offset-4 transition hover:underline">
+                    <HeadlineText text={article.title} />
                   </h2>
                 </a>
               ) : (
-                <h2 className="mt-4 hangul-keep text-balance font-tabloid text-[1.28rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink/55">
+                <h2 className="headline-wrap mt-4 text-balance font-tabloid text-[1.28rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink/55">
                   기사 없음
                 </h2>
               )}

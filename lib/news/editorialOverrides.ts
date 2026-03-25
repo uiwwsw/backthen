@@ -5,6 +5,7 @@ const editorialOverrides: Record<string, IssueOfDay> = {
     year: 1996,
     monthDay: '03-24',
     headline: '與 "조기진화" 野 "득표연계" 장학로 파문 정치권 동향',
+    rawHeadline: '與 "조기진화" 野 "득표연계" 장학로 파문 정치권 동향',
     summary:
       '1996년 3월 24일, 장학로 파문은 4·11 총선을 앞둔 정치권의 핵심 변수로 떠올랐습니다. 동아일보 디지털 아카이브의 3면과 4면, 6면 기사 목록을 보면 검찰 수사, 여야 공방, 주말 유세가 같은 쟁점으로 이어졌습니다.',
     sourceName: 'donga',

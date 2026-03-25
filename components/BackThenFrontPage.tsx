@@ -1,4 +1,5 @@
 import { ArchiveEmptyState } from '@/components/ArchiveEmptyState';
+import { HeadlineText } from '@/components/HeadlineText';
 import { LeadStory } from '@/components/LeadStory';
 import { MastheadBand } from '@/components/MastheadBand';
 import { SourceMeta } from '@/components/SourceMeta';
@@ -87,10 +88,10 @@ export function BackThenFrontPage({
                           {String(year).slice(-2)}
                         </p>
                       </div>
-                      <div className="space-y-2">
+                      <div className="min-w-0 space-y-2">
                         <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">머리기사</p>
-                        <p className="hangul-keep text-balance font-tabloid text-[1.08rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink">
-                          {issue.headline}
+                        <p className="headline-wrap text-balance font-tabloid text-[1.08rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink">
+                          <HeadlineText text={issue.headline} />
                         </p>
                       </div>
                     </div>
@@ -128,7 +129,7 @@ export function BackThenFrontPage({
                           listedArticles.slice(0, 4).map((article, index) => (
                             <a
                               key={`${article.url}-aside`}
-                              className="grid grid-cols-[28px_minmax(0,1fr)] gap-3 border-t border-ink/12 pt-3 first:border-t-0 first:pt-0"
+                              className="grid min-w-0 grid-cols-[28px_minmax(0,1fr)] gap-3 border-t border-ink/12 pt-3 first:border-t-0 first:pt-0"
                               href={article.url}
                               rel="noreferrer"
                               target="_blank"
@@ -136,8 +137,10 @@ export function BackThenFrontPage({
                               <span className="font-tabloid text-[1rem] font-bold leading-none tracking-[-0.04em] text-tabloid-red">
                                 {String(index + 1).padStart(2, '0')}
                               </span>
-                              <div className="space-y-1">
-                                <p className="hangul-keep text-balance font-sans text-[0.86rem] leading-6 text-ink/88">{article.title}</p>
+                              <div className="min-w-0 space-y-1">
+                                <p className="headline-wrap text-balance font-sans text-[0.86rem] leading-6 text-ink/88">
+                                  <HeadlineText text={article.title} />
+                                </p>
                                 <p className="font-sans text-[0.8rem] leading-5 text-muted-ink">
                                   {getSourceLabel(article.sourceName, article.url)}
                                   {article.section ? ` · ${article.section}` : ''}

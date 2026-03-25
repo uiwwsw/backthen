@@ -118,6 +118,67 @@ export function normalizeWhitespace(value: string) {
   return value.replace(/\s+/g, ' ').trim();
 }
 
+function stripHeadlineWrappers(token: string) {
+  return token.replace(/["'“”‘’()[\]{}【】〔〕〈〉《》「」『』]/gu, '');
+}
+
+function isShortHangulToken(token: string) {
+  return /^[\p{Script=Hangul}]{1,2}$/u.test(token);
+}
+
+function isStrongFragmentToken(token: string) {
+  const stripped = stripHeadlineWrappers(token);
+
+  if (!stripped) {
+    return false;
+  }
+
+  return stripped.length === 1 || /[\p{Script=Han}]/u.test(stripped) || /\d/u.test(stripped);
+}
+
+function isMergeableFragmentToken(token: string) {
+  const stripped = stripHeadlineWrappers(token);
+
+  if (!stripped) {
+    return false;
+  }
+
+  return /^[\p{Script=Hangul}\p{Script=Han}\p{N}]+$/u.test(stripped) && stripped.length <= 4;
+}
+
+function looksFragmentedHeadline(title: string) {
+  const tokens = normalizeWhitespace(title).split(/\s+/).filter(Boolean);
+
+  if (tokens.length < 4) {
+    return false;
+  }
+
+  const strongCount = tokens.filter(isStrongFragmentToken).length;
+  const mergeableCount = tokens.filter(isMergeableFragmentToken).length;
+  let longestMergeableRun = 0;
+  let currentRun = 0;
+
+  for (const token of tokens) {
+    if (isMergeableFragmentToken(token)) {
+      currentRun += 1;
+      longestMergeableRun = Math.max(longestMergeableRun, currentRun);
+      continue;
+    }
+
+    currentRun = 0;
+  }
+
+  return strongCount >= 3 && (mergeableCount / tokens.length >= 0.5 || longestMergeableRun >= 4);
+}
+
+function repairFragmentedHeadlineSpacing(title: string) {
+  return normalizeWhitespace(title)
+    .replace(/([(\[{【〔〈《「『])\s+/gu, '$1')
+    .replace(/\s+([)\]}】〕〉》」』,./·ㆍ:;!?])/gu, '$1')
+    .replace(/(?<=[\p{Script=Hangul}\p{Script=Han}\p{N})\]}】〕〉》」』])\s+(?=[(\[{【〔〈《「『\p{Script=Hangul}\p{Script=Han}\p{N}])/gu, '')
+    .replace(/(?<=[(\[{【〔〈《「『])\s+/gu, '');
+}
+
 export function extractSegment(html: string, startMarker: string, endMarker: string) {
   const startIndex = html.indexOf(startMarker);
 
@@ -228,6 +289,10 @@ export function extractTitle(html: string) {
   return normalizeHeadline(rawTitle);
 }
 
+export function extractRawTitle(html: string) {
+  return stripHtml(extractMetaContent(html, 'og:title') ?? html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? '');
+}
+
 export function extractPublishedAt(html: string) {
   return (
     extractMetaContent(html, 'article:published_time') ??
@@ -323,7 +388,8 @@ export async function candidateFromArticleUrl(
     return null;
   }
 
-  const title = extractTitle(html) || normalizeHeadline(titleFallback);
+  const rawTitle = extractRawTitle(html) || normalizeWhitespace(titleFallback);
+  const title = normalizeHeadline(rawTitle);
   const section = extractSection(html);
   const publishedAt = extractPublishedAt(html);
 
@@ -334,6 +400,7 @@ export async function candidateFromArticleUrl(
   const candidate: ArticleCandidate = {
     sourceName,
     title,
+    rawTitle,
     url,
     publishedAt,
     excerpt: extractExcerpt(html),
@@ -348,11 +415,17 @@ export async function candidateFromArticleUrl(
 }
 
 export function normalizeHeadline(title: string) {
-  return normalizeWhitespace(
+  const cleaned = normalizeWhitespace(
     title
       .replace(/\s*[|｜]\s*(중앙일보|동아일보|조선일보|JoongAng Ilbo|The Dong-a Ilbo|Chosun)\s*$/i, '')
       .replace(/\s*-\s*(중앙일보|동아일보|조선일보)\s*$/i, '')
   );
+
+  if (!cleaned) {
+    return cleaned;
+  }
+
+  return looksFragmentedHeadline(cleaned) ? repairFragmentedHeadlineSpacing(cleaned) : cleaned;
 }
 
 function matchesRequestedDate(

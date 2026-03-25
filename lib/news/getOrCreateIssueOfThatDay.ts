@@ -124,6 +124,7 @@ export const getOrCreateIssueOfThatDay = cache(async (year: number, monthDay: st
     year,
     monthDay,
     headline: selection.primary.title,
+    rawHeadline: selection.primary.rawTitle ?? selection.primary.title,
     summary: summarizeIssue({
       year,
       monthDay,

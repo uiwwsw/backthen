@@ -5,6 +5,7 @@ import {
   candidateFromArticleUrl,
   collectArticleAnchors,
   fetchHtml,
+  normalizeHeadline,
   padDate,
   stripHtml,
   type SourceCrawlerInput
@@ -123,15 +124,18 @@ function parseArchiveCandidates(html: string, year: number, month: number, day: 
 
     for (const articleMatch of articleMatches) {
       const [, idx, rawTitle] = articleMatch;
-      const title = stripHtml(rawTitle);
+      const cleanedRawTitle = stripHtml(rawTitle);
 
-      if (!title || shouldSkipArchiveHeadline(title)) {
+      if (!cleanedRawTitle || shouldSkipArchiveHeadline(cleanedRawTitle)) {
         continue;
       }
+
+      const title = normalizeHeadline(cleanedRawTitle);
 
       candidates.push({
         sourceName: 'donga',
         title,
+        rawTitle: cleanedRawTitle,
         url: buildArchiveArticleUrl(idx),
         publishedAt,
         excerpt: null,

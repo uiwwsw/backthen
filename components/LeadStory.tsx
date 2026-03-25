@@ -1,3 +1,4 @@
+import { HeadlineText } from '@/components/HeadlineText';
 import { InsideArticles } from '@/components/InsideArticles';
 import { formatPublishedAt, getSourceLabel, getSourceLinkLabel } from '@/lib/date';
 import type { IssueOfDay } from '@/lib/db/types';
@@ -202,8 +203,8 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
         </div>
 
         <div className="space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-          <h1 className="hangul-keep text-balance max-w-none font-tabloid text-[clamp(2.9rem,7.4vw,6.45rem)] font-extrabold leading-[0.86] tracking-[-0.045em] text-ink">
-            {issue.headline}
+          <h1 className="headline-wrap text-balance max-w-none font-tabloid text-[clamp(2.9rem,7.4vw,6.45rem)] font-extrabold leading-[0.86] tracking-[-0.045em] text-ink">
+            <HeadlineText text={issue.headline} />
           </h1>
 
           <p className="hangul-keep max-w-5xl border-l-4 border-tabloid-red pl-4 font-sans text-[clamp(0.98rem,1.45vw,1.2rem)] leading-[1.68] text-muted-ink">
