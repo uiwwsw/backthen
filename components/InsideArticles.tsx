@@ -4,6 +4,7 @@ import { formatPublishedAt, getSourceLabel } from '@/lib/date';
 
 type InsideArticlesProps = {
   articles: ArticleCandidate[];
+  className?: string;
   primarySource: SourceName;
 };
 
@@ -17,7 +18,7 @@ function getArticleSummary(article: ArticleCandidate) {
   return null;
 }
 
-export function InsideArticles({ articles, primarySource }: InsideArticlesProps) {
+export function InsideArticles({ articles, className, primarySource }: InsideArticlesProps) {
   const slots = sourceOrder
     .filter((source) => source !== primarySource)
     .map((source) => ({
@@ -26,13 +27,13 @@ export function InsideArticles({ articles, primarySource }: InsideArticlesProps)
     }));
 
   return (
-    <section className="border-2 border-ink bg-[color:var(--surface)]">
+    <section className={`flex h-full flex-col border-2 border-ink bg-[color:var(--surface)] ${className ?? ''}`.trim()}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink bg-[color:var(--banner)] px-4 py-3 text-[color:var(--banner-ink)] sm:px-5">
         <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em]">다른 신문 기사</p>
         <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em] text-[color:var(--banner-ink-muted)]">조중동 지면</p>
       </div>
 
-      <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-2">
+      <div className="grid flex-1 gap-4 p-4 sm:p-5 lg:grid-cols-2 lg:auto-rows-fr">
         {slots.map(({ source, article }, index) => {
           const sourceLabel = getSourceLabel(source, article?.url);
           const summary = article ? getArticleSummary(article) : null;

@@ -250,6 +250,37 @@ export async function getEditorialOverride(year: number, monthDay: string) {
   return result.rows[0] ? mapIssue(result.rows[0]) : null;
 }
 
+export async function getAvailableIssueYearsForMonthDay(monthDay: string) {
+  const pool = getPool();
+
+  if (!pool) {
+    return [];
+  }
+
+  await ensureSchema();
+
+  const result = await pool.query<{ year: number }>(
+    `
+      SELECT year
+      FROM (
+        SELECT year
+        FROM issues_of_day
+        WHERE month_day = $1
+
+        UNION
+
+        SELECT year
+        FROM editorial_overrides
+        WHERE month_day = $1
+      ) AS available_years
+      ORDER BY year ASC
+    `,
+    [monthDay]
+  );
+
+  return result.rows.map((row) => row.year);
+}
+
 export async function storeIssueRecord(issue: IssueOfDay, candidates: ArticleCandidate[]) {
   const pool = getPool();
 

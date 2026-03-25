@@ -80,28 +80,28 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
   const bodyCandidates =
     summarySentences.length > 1
       ? [
-          summarySentences.slice(1, 1 + Math.ceil((summarySentences.length - 1) / 2)).join(' '),
-          summarySentences.slice(1 + Math.ceil((summarySentences.length - 1) / 2)).join(' ')
-        ].filter(Boolean)
+        summarySentences.slice(1, 1 + Math.ceil((summarySentences.length - 1) / 2)).join(' '),
+        summarySentences.slice(1 + Math.ceil((summarySentences.length - 1) / 2)).join(' ')
+      ].filter(Boolean)
       : issue.secondaryArticles
-          .map((article) => article.excerpt?.trim())
-          .filter((excerpt): excerpt is string => Boolean(excerpt))
-          .slice(0, 2);
+        .map((article) => article.excerpt?.trim())
+        .filter((excerpt): excerpt is string => Boolean(excerpt))
+        .slice(0, 2);
   const bodyParagraphs = buildDisplayBodyParagraphs(bodyCandidates.length ? bodyCandidates : [cleanedSummary || issue.summary]);
   const displayBodyParagraphs = bodyParagraphs.length ? bodyParagraphs : [cleanedSummary || issue.summary];
   const leadVisualStyle = issue.backgroundImageUrl
     ? {
-        backgroundImage: `linear-gradient(180deg, var(--photo-fill-start) 0%, var(--photo-fill-end) 100%), url(${issue.backgroundImageUrl})`
-      }
+      backgroundImage: `linear-gradient(180deg, var(--photo-fill-start) 0%, var(--photo-fill-end) 100%), url(${issue.backgroundImageUrl})`
+    }
     : {
-        backgroundImage:
-          'linear-gradient(135deg, var(--photo-fallback-start) 0%, var(--photo-fallback-end) 100%), radial-gradient(circle at 20% 20%, rgba(255,255,255,0.12), transparent 40%)'
-      };
+      backgroundImage:
+        'linear-gradient(135deg, var(--photo-fallback-start) 0%, var(--photo-fallback-end) 100%), radial-gradient(circle at 20% 20%, rgba(255,255,255,0.12), transparent 40%)'
+    };
 
   return (
-    <article className="space-y-5">
+    <article className="flex flex-col gap-5 xl:h-full xl:min-h-0">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
-        <div>
+        <div className="xl:flex xl:h-full xl:flex-col">
           <div className="flex flex-wrap items-center justify-between gap-2 bg-[color:var(--banner)] px-4 py-2 text-[color:var(--banner-ink)]">
             <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.28em]">제1면 머리기사</p>
             <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--banner-ink-muted)]">
@@ -109,7 +109,7 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
             </p>
           </div>
           <div
-            className="relative min-h-[38svh] overflow-hidden border-x-2 border-b-2 border-ink bg-[color:var(--banner)] bg-cover bg-center sm:min-h-[44svh] xl:min-h-[50svh]"
+            className="relative min-h-[38svh] overflow-hidden border-x-2 border-b-2 border-ink bg-[color:var(--banner)] bg-cover bg-center sm:min-h-[44svh] xl:min-h-[50svh] xl:flex-1 xl:min-h-0"
             style={leadVisualStyle}
           >
             <div className="absolute inset-0 bg-grain opacity-30 mix-blend-screen" />
@@ -193,7 +193,7 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
         </div>
       </div>
 
-      <div className="border-2 border-ink bg-[color:var(--surface)]">
+      <div className="border-2 border-ink bg-[color:var(--surface)] xl:flex xl:flex-[1_1_auto] xl:min-h-0 xl:flex-col">
         <div className="flex flex-wrap items-center gap-3 border-b-2 border-ink px-4 py-3 sm:px-5">
           <span className="bg-tabloid-red px-3 py-1 font-tabloid text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--accent-ink)]">
             머리기사
@@ -202,16 +202,16 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
           <span className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-ink">{publishedLabel}</span>
         </div>
 
-        <div className="space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <div className="space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:flex xl:flex-1 xl:min-h-0 xl:flex-col xl:gap-5 xl:space-y-0">
           <h1 className="headline-wrap text-balance max-w-none font-tabloid text-[clamp(2.9rem,7.4vw,6.45rem)] font-extrabold leading-[0.86] tracking-[-0.045em] text-ink">
             <HeadlineText text={issue.headline} />
           </h1>
 
-          <p className="hangul-keep max-w-5xl border-l-4 border-tabloid-red pl-4 font-sans text-[clamp(0.98rem,1.45vw,1.2rem)] leading-[1.68] text-muted-ink">
+          <p className="!mt-auto pt-2 hangul-keep max-w-5xl border-l-4 border-tabloid-red pl-4 font-sans text-[clamp(0.98rem,1.45vw,1.2rem)] leading-[1.68] text-muted-ink">
             {lede}
           </p>
 
-          <div className="grid gap-5 border-t-4 border-ink pt-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
+          <div className="grid gap-5 border-t-4 border-ink pt-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:gap-6 xl:mt-auto xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
             <div className="min-w-0 lg:pr-2">
               <div className="max-w-3xl space-y-4">
                 {displayBodyParagraphs.map((paragraph, index) => (
@@ -270,7 +270,11 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
         </div>
       </div>
 
-      <InsideArticles articles={issue.secondaryArticles} primarySource={issue.sourceName} />
+      <InsideArticles
+        articles={issue.secondaryArticles}
+        className="xl:min-h-[260px] xl:flex-[0.78_1_0%]"
+        primarySource={issue.sourceName}
+      />
     </article>
   );
 }

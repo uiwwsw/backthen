@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { BackThenFrontPage } from '@/components/BackThenFrontPage';
 import { getTodayInSeoul, toKoreanDateLabel } from '@/lib/date';
+import { getAvailableIssueYears } from '@/lib/news/getAvailableIssueYears';
 import { getOrCreateIssueOfThatDay } from '@/lib/news/getOrCreateIssueOfThatDay';
 import { getIssueThemePalette, getThemeStyle } from '@/lib/theme';
 import {
@@ -156,11 +157,16 @@ export default async function YearsAgoPage({ params }: YearsAgoPageProps) {
   if (parsedYearsAgo !== null && validateYearsAgo(parsedYearsAgo, today.year)) {
     const year = getYearFromYearsAgo(parsedYearsAgo, today.year);
     const issue = await getOrCreateIssueOfThatDay(year, today.monthDay);
+    const knownYears = await getAvailableIssueYears(today.monthDay, year, today.year);
+    const availableIssueYears = issue
+      ? Array.from(new Set([...knownYears, year])).sort((left, right) => left - right)
+      : knownYears;
     const themePalette = await getIssueThemePalette(issue?.backgroundImageUrl ?? null);
     const themeStyle = getThemeStyle(themePalette);
 
     return (
       <BackThenFrontPage
+        availableIssueYears={availableIssueYears}
         year={year}
         currentYearsAgo={parsedYearsAgo}
         today={today}

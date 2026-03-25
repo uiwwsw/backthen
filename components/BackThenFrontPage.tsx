@@ -1,4 +1,5 @@
 import { ArchiveEmptyState } from '@/components/ArchiveEmptyState';
+import { ArchiveYearNavigator } from '@/components/ArchiveYearNavigator';
 import { HeadlineText } from '@/components/HeadlineText';
 import { LeadStory } from '@/components/LeadStory';
 import { MastheadBand } from '@/components/MastheadBand';
@@ -17,6 +18,7 @@ type EmptyStateCopy = {
 };
 
 type BackThenFrontPageProps = {
+  availableIssueYears?: number[];
   year: number;
   currentYearsAgo: number;
   today: SeoulDate;
@@ -32,6 +34,7 @@ const defaultEmptyState: EmptyStateCopy = {
 };
 
 export function BackThenFrontPage({
+  availableIssueYears = [],
   year,
   currentYearsAgo,
   today,
@@ -61,8 +64,8 @@ export function BackThenFrontPage({
             titleLabel={titleLabel}
           />
 
-          <div className="mt-4 grid flex-1 gap-5 xl:grid-cols-[minmax(0,1.48fr)_minmax(280px,0.48fr)] xl:gap-6">
-            <section className="min-w-0">
+          <div className="mt-4 grid flex-1 min-h-0 gap-5 xl:grid-cols-[minmax(0,1.48fr)_minmax(280px,0.48fr)] xl:gap-6">
+            <section className="min-w-0 xl:min-h-0">
               {issue ? (
                 <LeadStory dateLabel={dateLabel} issue={issue} monthDayLabel={monthDayLabel} />
               ) : (
@@ -70,7 +73,7 @@ export function BackThenFrontPage({
               )}
             </section>
 
-            <aside className="flex min-w-0 flex-col gap-4 xl:border-l-2 xl:border-ink xl:pl-6">
+            <aside className="flex min-w-0 flex-col gap-4 xl:h-full xl:min-h-0 xl:border-l-2 xl:border-ink xl:pl-6">
               {issue ? (
                 <section className="archive-panel border-2 border-ink">
                   <div className="flex items-center justify-between gap-3 border-b-2 border-ink bg-[color:var(--banner)] px-4 py-2 text-[color:var(--banner-ink)]">
@@ -169,6 +172,15 @@ export function BackThenFrontPage({
                   </p>
                 </section>
               )}
+
+              {issue ? (
+                <ArchiveYearNavigator
+                  activeYear={year}
+                  availableYears={availableIssueYears}
+                  currentYear={today.year}
+                  monthDayLabel={monthDayLabel}
+                />
+              ) : null}
             </aside>
           </div>
         </div>

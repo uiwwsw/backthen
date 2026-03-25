@@ -24,3 +24,10 @@ const editorialOverrides: Record<string, IssueOfDay> = {
 export function getLocalEditorialOverride(year: number, monthDay: string) {
   return editorialOverrides[`${year}-${monthDay}`] ?? null;
 }
+
+export function getLocalEditorialOverrideYears(monthDay: string) {
+  return Object.values(editorialOverrides)
+    .filter((issue) => issue.monthDay === monthDay)
+    .map((issue) => issue.year)
+    .sort((left, right) => left - right);
+}
