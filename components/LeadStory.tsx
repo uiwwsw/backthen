@@ -1,5 +1,5 @@
 import { InsideArticles } from '@/components/InsideArticles';
-import { formatPublishedAt, getSourceLabel } from '@/lib/date';
+import { formatPublishedAt, getSourceLabel, getSourceLinkLabel } from '@/lib/date';
 import type { IssueOfDay } from '@/lib/db/types';
 import { sanitizeIssueSummary } from '@/lib/news/summarizeIssue';
 
@@ -178,7 +178,14 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
               </div>
               <div className="grid grid-cols-[56px_minmax(0,1fr)] gap-3 border-t border-ink/12 pt-3">
                 <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-ink">출처</p>
-                <p className="hangul-keep break-all font-sans text-[0.82rem] leading-6 text-ink/76">{issue.sourceUrl}</p>
+                <a
+                  className="hangul-keep w-fit font-sans text-[0.82rem] leading-6 text-ink/76 underline-offset-4 transition hover:underline"
+                  href={issue.sourceUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {getSourceLinkLabel(issue.sourceName, issue.sourceUrl)}
+                </a>
               </div>
             </div>
           </div>

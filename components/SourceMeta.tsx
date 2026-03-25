@@ -1,5 +1,5 @@
 import type { IssueOfDay } from '@/lib/db/types';
-import { formatPublishedAt, getSourceLabel, getSourceWebAddress } from '@/lib/date';
+import { formatPublishedAt, getSourceLabel, getSourceLinkLabel } from '@/lib/date';
 
 type SourceMetaProps = {
   issue: IssueOfDay;
@@ -48,14 +48,14 @@ export function SourceMeta({ issue }: SourceMetaProps) {
         </div>
 
         <div className="space-y-2 border-t-2 border-ink pt-4">
-          <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">원문 주소</p>
+          <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">원문 링크</p>
           <a
-            className="block break-all font-sans text-[0.94rem] leading-7 text-ink underline-offset-4 transition hover:underline"
+            className="block font-sans text-[0.94rem] leading-7 text-ink underline-offset-4 transition hover:underline"
             href={issue.sourceUrl}
             rel="noreferrer"
             target="_blank"
           >
-            {getSourceWebAddress(issue.sourceUrl)}
+            {getSourceLinkLabel(issue.sourceName, issue.sourceUrl)}
           </a>
         </div>
 

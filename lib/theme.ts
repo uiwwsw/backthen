@@ -77,9 +77,10 @@ const DEFAULT_PAPER = { r: 245, g: 239, b: 228 };
 const DEFAULT_INK = { r: 17, g: 17, b: 17 };
 const DEFAULT_MUTED_INK = { r: 63, g: 59, b: 54 };
 const DEFAULT_ACCENT = { r: 207, g: 16, b: 32 };
+const CRIMSON_ACCENT = { r: 191, g: 38, b: 58 };
 const WHITE = { r: 255, g: 255, b: 255 };
 
-export const defaultThemePalette: ThemePalette = {
+const baseDefaultThemePalette: ThemePalette = {
   paper: '#f5efe4',
   paperTop: '#f3e8d2',
   paperBottom: '#e7d8bd',
@@ -125,6 +126,8 @@ export const defaultThemePalette: ThemePalette = {
   photoOverlaySoft: 'rgba(17, 17, 17, 0.12)',
   photoShadow: 'rgba(10, 10, 10, 0.54)'
 };
+
+export const defaultThemePalette = grayscaleThemePalette(baseDefaultThemePalette);
 
 export const getIssueThemePalette = cache(async (imageUrl: string | null): Promise<ThemePalette> => {
   if (!imageUrl) {
@@ -276,6 +279,7 @@ async function fetchPaletteSample(imageUrl: string): Promise<PaletteSample> {
 }
 
 function buildThemePalette(sample: PaletteSample): ThemePalette {
+  const fallbackAccentSeed = sanitizeAccentCandidate(mixRgb(sample.average, DEFAULT_ACCENT, 0.78), sample.average);
   const paperSeed =
     pickCandidate(
       sample.candidates,
@@ -297,15 +301,16 @@ function buildThemePalette(sample: PaletteSample): ThemePalette {
         candidate.lightness <= 0.74 &&
         colorDistance(candidate.color, bannerSeed) >= 38 &&
         colorDistance(candidate.color, paperSeed) >= 28,
-      (candidate) => Math.sqrt(candidate.count) * 10 + candidate.saturation * 120 - Math.abs(candidate.lightness - 0.5) * 18
-    ) ?? mixRgb(paperSeed, DEFAULT_ACCENT, 0.72);
+      (candidate) => getAccentCandidateScore(candidate, bannerSeed, paperSeed)
+    ) ?? fallbackAccentSeed;
 
+  const safeAccentSeed = sanitizeAccentCandidate(accentSeed, paperSeed);
   const paperBase = tunePaper(mixRgb(paperSeed, DEFAULT_PAPER, 0.38));
   const paperTop = withLightness(paperBase, 0.95);
   const paperBottom = withLightness(paperBase, 0.85);
   let banner = tuneBanner(mixRgb(bannerSeed, DEFAULT_INK, 0.22));
   let ink = tuneInk(mixRgb(banner, DEFAULT_INK, 0.42), paperBase);
-  let accent = tuneAccent(accentSeed, paperBase);
+  let accent = tuneAccent(safeAccentSeed, paperBase);
 
   if (contrastRatio(accent, paperBase) < 3.2) {
     accent = tuneAccent(mixRgb(accent, banner, 0.22), paperBase);
@@ -322,14 +327,14 @@ function buildThemePalette(sample: PaletteSample): ThemePalette {
   const accentInk = pickReadableForeground(accent, WHITE, ink);
   const shellTop = mixRgb(paperBottom, banner, 0.18);
   const shellBottom = mixRgb(paperBottom, banner, 0.3);
-  const surfaceTint = mixRgb(paperTop, accent, 0.06);
+  const surfaceTint = mixRgb(paperTop, accent, 0.035);
   const surface = toRgba(surfaceTint, 0.78);
-  const surfaceAlt = toHex(mixRgb(paperBottom, accent, 0.14));
+  const surfaceAlt = toHex(mixRgb(paperBottom, accent, 0.08));
   const surfaceAlt2 = toHex(mixRgb(paperBottom, banner, 0.06));
-  const surfaceMuted = toHex(mixRgb(paperBottom, paperSeed, 0.16));
-  const surfaceCard = toHex(mixRgb(paperBottom, accent, 0.08));
+  const surfaceMuted = toHex(neutralizeRgb(mixRgb(paperBottom, paperSeed, 0.12), 0.72));
+  const surfaceCard = toHex(mixRgb(paperBottom, accent, 0.05));
   const surfaceStrong = toRgba(mixRgb(banner, paperBase, 0.12), 0.08);
-  const surfaceTag = toRgba(mixRgb(paperTop, accent, 0.1), 0.82);
+  const surfaceTag = toRgba(mixRgb(paperTop, accent, 0.045), 0.82);
   const line = toRgba(ink, 0.18);
   const lineSoft = toRgba(ink, 0.12);
   const frameLine = toRgba(ink, 0.15);
@@ -338,13 +343,13 @@ function buildThemePalette(sample: PaletteSample): ThemePalette {
   const displayGhost = toRgba(bannerInk, 0.16);
   const paperEdge = toRgba(mixRgb(paperBottom, banner, 0.22), 0.1);
   const paperEdgeStrong = toRgba(mixRgb(paperBottom, banner, 0.32), 0.12);
-  const paperSpotA = toRgba(mixRgb(paperSeed, accent, 0.32), 0.1);
-  const paperSpotB = toRgba(mixRgb(paperSeed, banner, 0.24), 0.1);
+  const paperSpotA = toRgba(mixRgb(paperBase, accent, 0.18), 0.07);
+  const paperSpotB = toRgba(mixRgb(paperBase, banner, 0.18), 0.07);
   const paperVignette = toRgba(banner, 0.05);
   const paperShadowSoft = toRgba(banner, 0.05);
   const frameShadow = toRgba(mixRgb(banner, DEFAULT_INK, 0.2), 0.24);
-  const archiveSpotA = toRgba(mixRgb(paperSeed, accent, 0.38), 0.08);
-  const archiveSpotB = toRgba(mixRgb(paperSeed, banner, 0.28), 0.08);
+  const archiveSpotA = toRgba(mixRgb(paperBase, accent, 0.18), 0.06);
+  const archiveSpotB = toRgba(mixRgb(paperBase, banner, 0.2), 0.06);
   const archiveVignette = toRgba(banner, 0.05);
   const archiveShadow = toRgba(banner, 0.05);
   const photoFillStart = toRgba(banner, 0.06);
@@ -355,7 +360,7 @@ function buildThemePalette(sample: PaletteSample): ThemePalette {
   const photoOverlaySoft = toRgba(banner, 0.14);
   const photoShadow = toRgba(mixRgb(banner, DEFAULT_INK, 0.2), 0.54);
 
-  return {
+  return grayscaleThemePalette({
     paper: toHex(paperBase),
     paperTop: toHex(paperTop),
     paperBottom: toHex(paperBottom),
@@ -400,7 +405,7 @@ function buildThemePalette(sample: PaletteSample): ThemePalette {
     photoOverlayStrong,
     photoOverlaySoft,
     photoShadow
-  };
+  });
 }
 
 function pickCandidate(
@@ -428,11 +433,12 @@ function pickCandidate(
 }
 
 function tunePaper(color: RgbColor) {
-  const hsl = rgbToHsl(color);
+  const neutral = neutralizeRgb(color, isEarthTone(rgbToHsl(color)) ? 0.84 : 0.68);
+  const hsl = rgbToHsl(neutral);
 
   return hslToRgb({
     h: hsl.h,
-    s: clamp(hsl.s * 0.6 + 0.04, 0.08, 0.28),
+    s: clamp(hsl.s * 0.22 + 0.015, 0.015, 0.11),
     l: 0.92
   });
 }
@@ -471,7 +477,7 @@ function tuneAccent(color: RgbColor, background: RgbColor) {
   const hsl = rgbToHsl(color);
   let accent = hslToRgb({
     h: hsl.h,
-    s: clamp(Math.max(hsl.s, 0.42), 0.4, 0.78),
+    s: clamp(Math.max(hsl.s, 0.48), 0.46, 0.78),
     l: clamp(hsl.l, 0.34, 0.56)
   });
 
@@ -480,6 +486,41 @@ function tuneAccent(color: RgbColor, background: RgbColor) {
   }
 
   return accent;
+}
+
+function getAccentCandidateScore(candidate: PaletteCandidate, bannerSeed: RgbColor, paperSeed: RgbColor) {
+  const hueScore = isEarthTone({ h: candidate.saturation === 0 ? 0 : rgbToHsl(candidate.color).h, s: candidate.saturation, l: candidate.lightness })
+    ? -34
+    : 0;
+
+  return (
+    Math.sqrt(candidate.count) * 10 +
+    candidate.saturation * 120 -
+    Math.abs(candidate.lightness - 0.5) * 18 +
+    hueScore +
+    colorDistance(candidate.color, bannerSeed) * 0.05 +
+    colorDistance(candidate.color, paperSeed) * 0.03
+  );
+}
+
+function sanitizeAccentCandidate(color: RgbColor, reference: RgbColor) {
+  const hsl = rgbToHsl(color);
+
+  if (!isEarthTone(hsl)) {
+    return color;
+  }
+
+  const remapped = hslToRgb({
+    h: hsl.l <= 0.44 ? 354 : 2,
+    s: clamp(Math.max(hsl.s, 0.58), 0.56, 0.8),
+    l: clamp(Math.max(hsl.l, 0.38), 0.38, 0.52)
+  });
+
+  return mixRgb(remapped, mixRgb(CRIMSON_ACCENT, reference, 0.08), 0.16);
+}
+
+function isEarthTone(color: HslColor) {
+  return color.h >= 24 && color.h <= 72 && color.s >= 0.14 && color.s <= 0.78 && color.l >= 0.18 && color.l <= 0.68;
 }
 
 function pickReadableForeground(background: RgbColor, light: RgbColor, dark: RgbColor) {
@@ -582,6 +623,77 @@ function mixRgb(base: RgbColor, target: RgbColor, amount: number): RgbColor {
     g: Math.round(base.g + (target.g - base.g) * ratio),
     b: Math.round(base.b + (target.b - base.b) * ratio)
   };
+}
+
+function neutralizeRgb(color: RgbColor, amount: number) {
+  const luminance = Math.round(color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722);
+  const neutral = { r: luminance, g: luminance, b: luminance };
+
+  return mixRgb(color, neutral, amount);
+}
+
+function grayscaleThemePalette(palette: ThemePalette): ThemePalette {
+  const preserveColorKeys = new Set<keyof ThemePalette>(['accent', 'accentStrong', 'accentInk', 'selection']);
+
+  return (Object.keys(palette) as Array<keyof ThemePalette>).reduce((nextPalette, key) => {
+    nextPalette[key] = preserveColorKeys.has(key) ? palette[key] : grayscaleCssColor(palette[key]);
+
+    return nextPalette;
+  }, {} as ThemePalette);
+}
+
+function grayscaleCssColor(value: string) {
+  const parsedColor = parseCssColor(value);
+
+  if (!parsedColor) {
+    return value;
+  }
+
+  const gray = neutralizeRgb(parsedColor, 1);
+
+  return parsedColor.alpha === undefined ? toHex(gray) : toRgba(gray, parsedColor.alpha);
+}
+
+function parseCssColor(value: string): (RgbColor & { alpha?: number }) | null {
+  const hexMatch = value.match(/^#([0-9a-f]{6})$/i);
+
+  if (hexMatch) {
+    return {
+      r: parseInt(hexMatch[1].slice(0, 2), 16),
+      g: parseInt(hexMatch[1].slice(2, 4), 16),
+      b: parseInt(hexMatch[1].slice(4, 6), 16)
+    };
+  }
+
+  const rgbMatch = value.match(/^rgba?\(([^)]+)\)$/i);
+
+  if (!rgbMatch) {
+    return null;
+  }
+
+  const channels = rgbMatch[1]
+    .split(',')
+    .map((channel) => channel.trim())
+    .map((channel) => Number(channel));
+
+  if (channels.length !== 3 && channels.length !== 4) {
+    return null;
+  }
+
+  const [r, g, b, alpha] = channels;
+
+  if ([r, g, b].some((channel) => Number.isNaN(channel))) {
+    return null;
+  }
+
+  return alpha === undefined || Number.isNaN(alpha)
+    ? { r, g, b }
+    : {
+        r,
+        g,
+        b,
+        alpha
+      };
 }
 
 function contrastRatio(foreground: RgbColor, background: RgbColor) {

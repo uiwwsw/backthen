@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { startTransition, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useYearNavigation } from '@/components/useYearNavigation';
+import { useState } from 'react';
 import { sanitizeYearsAgoInput } from '@/lib/year';
 
 type YearEditionInputProps = {
@@ -12,7 +11,7 @@ type YearEditionInputProps = {
 };
 
 export function YearEditionInput({ currentYearsAgo, minYearsAgo, maxYearsAgo }: YearEditionInputProps) {
-  const router = useRouter();
+  const { goToYearsAgo, isNavigating, pendingYearsAgo } = useYearNavigation();
   const [value, setValue] = useState(String(currentYearsAgo));
   const [error, setError] = useState<string | null>(null);
   const previousYearsAgo = currentYearsAgo > minYearsAgo ? currentYearsAgo - 1 : null;
@@ -33,10 +32,13 @@ export function YearEditionInput({ currentYearsAgo, minYearsAgo, maxYearsAgo }: 
       return;
     }
 
+    if (numeric === currentYearsAgo) {
+      setError('이미 보고 있는 판입니다.');
+      return;
+    }
+
     setError(null);
-    startTransition(() => {
-      router.push(`/${numeric}`);
-    });
+    goToYearsAgo(numeric);
   };
 
   return (
@@ -46,6 +48,23 @@ export function YearEditionInput({ currentYearsAgo, minYearsAgo, maxYearsAgo }: 
       </div>
 
       <div className="space-y-4 p-4">
+        {isNavigating && pendingYearsAgo !== null ? (
+          <div
+            aria-live="polite"
+            className="border border-ink bg-[color:var(--surface-muted)] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="hangul-keep font-sans text-[0.95rem] leading-6 text-ink/86">
+                /{pendingYearsAgo} 판을 불러오는 중입니다.
+              </p>
+              <div className="inline-flex items-center gap-2 font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-ink">
+                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-tabloid-red" />
+                Loading
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <div className="space-y-2">
           <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">지금에서 얼마나 거슬러 갈까요</p>
           <p className="hangul-keep font-sans text-[0.9rem] leading-6 text-ink/78">입력값은 절대 연도가 아니라 지금 기준 몇 년 전인지입니다.</p>
@@ -53,7 +72,8 @@ export function YearEditionInput({ currentYearsAgo, minYearsAgo, maxYearsAgo }: 
             <label className="flex-1">
               <span className="sr-only">몇 년 전 입력</span>
               <input
-                className="w-full border-0 border-b-[3px] border-ink bg-transparent px-0 pb-2 pt-1 font-tabloid text-[2.4rem] font-bold leading-none tracking-[-0.04em] text-ink outline-none placeholder:text-ink/28 focus:border-tabloid-red"
+                className="w-full border-0 border-b-[3px] border-ink bg-transparent px-0 pb-2 pt-1 font-tabloid text-[2.4rem] font-bold leading-none tracking-[-0.04em] text-ink outline-none placeholder:text-ink/28 focus:border-tabloid-red disabled:cursor-progress disabled:opacity-55"
+                disabled={isNavigating}
                 inputMode="numeric"
                 maxLength={maxInputLength}
                 pattern="[0-9]*"
@@ -72,28 +92,39 @@ export function YearEditionInput({ currentYearsAgo, minYearsAgo, maxYearsAgo }: 
               />
             </label>
             <button
-              className="border-2 border-ink bg-tabloid-red px-4 py-3 font-tabloid text-[11px] font-bold uppercase tracking-[0.3em] text-[color:var(--accent-ink)] transition hover:bg-[color:var(--tabloid-red-strong)]"
+              className="border-2 border-ink bg-tabloid-red px-4 py-3 font-tabloid text-[11px] font-bold uppercase tracking-[0.3em] text-[color:var(--accent-ink)] transition hover:bg-[color:var(--tabloid-red-strong)] disabled:cursor-progress disabled:bg-[color:var(--tabloid-red-strong)] disabled:opacity-80"
+              disabled={isNavigating}
               type="button"
               onClick={submit}
             >
-              이동
+              {isNavigating ? '여는 중' : '이동'}
             </button>
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-3 border-y-2 border-ink py-3 font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-ink">
           {previousYearsAgo !== null ? (
-            <Link className="transition hover:text-ink" href={`/${previousYearsAgo}`}>
+            <button
+              className="transition hover:text-ink disabled:cursor-progress disabled:opacity-35"
+              disabled={isNavigating}
+              type="button"
+              onClick={() => goToYearsAgo(previousYearsAgo)}
+            >
               더 최근
-            </Link>
+            </button>
           ) : (
             <span className="opacity-35">더 최근</span>
           )}
           <span>{helper}</span>
           {nextYearsAgo !== null ? (
-            <Link className="transition hover:text-ink" href={`/${nextYearsAgo}`}>
+            <button
+              className="transition hover:text-ink disabled:cursor-progress disabled:opacity-35"
+              disabled={isNavigating}
+              type="button"
+              onClick={() => goToYearsAgo(nextYearsAgo)}
+            >
               더 과거
-            </Link>
+            </button>
           ) : (
             <span className="opacity-35">더 과거</span>
           )}

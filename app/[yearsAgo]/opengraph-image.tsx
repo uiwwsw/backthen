@@ -1,4 +1,6 @@
+import { readFile } from 'fs/promises';
 import { ImageResponse } from 'next/og';
+import { join } from 'path';
 import { getTodayInSeoul, toKoreanDateLabel } from '@/lib/date';
 import { getOrCreateIssueOfThatDay } from '@/lib/news/getOrCreateIssueOfThatDay';
 import {
@@ -29,6 +31,11 @@ type OgImageProps = {
 
 export default async function OpenGraphImage({ params }: OgImageProps) {
   const today = getTodayInSeoul();
+  const [chosunSm, chosunKm, chosunCentennial] = await Promise.all([
+    readFile(join(process.cwd(), 'public/fonts/ChosunSm.TTF')),
+    readFile(join(process.cwd(), 'public/fonts/ChosunKm.TTF')),
+    readFile(join(process.cwd(), 'public/fonts/ChosunCentennial_ttf.ttf'))
+  ]);
   const parsedYearsAgo = parseYearsAgoParam(params.yearsAgo);
   const legacyYear = parseLegacyYearParam(params.yearsAgo);
   const yearsAgo =
@@ -54,7 +61,7 @@ export default async function OpenGraphImage({ params }: OgImageProps) {
           background: 'linear-gradient(180deg, #f1e6d3 0%, #e5d8c2 100%)',
           color: '#111111',
           padding: '42px',
-          fontFamily: '"Noto Serif KR", "Noto Serif", serif'
+          fontFamily: 'ChosunSm'
         }}
       >
         <div
@@ -68,10 +75,12 @@ export default async function OpenGraphImage({ params }: OgImageProps) {
             paddingBottom: '16px'
           }}
         >
-          <div style={{ display: 'flex', maxWidth: '68%', fontSize: 44, fontWeight: 700, lineHeight: 1.08 }}>
+          <div
+            style={{ display: 'flex', maxWidth: '68%', fontSize: 44, fontWeight: 700, lineHeight: 1.08, fontFamily: 'ChosunCentennial' }}
+          >
             {titleLabel}
           </div>
-          <div style={{ fontSize: 24, letterSpacing: '0.22em', textTransform: 'uppercase' }}>BackThen</div>
+          <div style={{ fontSize: 24, letterSpacing: '0.22em', textTransform: 'uppercase', fontFamily: 'ChosunKm' }}>BackThen</div>
         </div>
         <div style={{ display: 'flex', flex: 1, gap: '28px', paddingTop: '26px' }}>
           <div
@@ -84,10 +93,10 @@ export default async function OpenGraphImage({ params }: OgImageProps) {
             }}
           />
           <div style={{ display: 'flex', width: '38%', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: 26, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#4d4942' }}>
+            <div style={{ fontSize: 26, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#4d4942', fontFamily: 'ChosunKm' }}>
               {toKoreanDateLabel(year, today.month, today.day)}
             </div>
-            <div style={{ fontSize: 70, lineHeight: 1.02, fontWeight: 700 }}>
+            <div style={{ fontSize: 70, lineHeight: 1.02, fontWeight: 700, fontFamily: 'ChosunKm' }}>
               {issue?.headline ?? '그날의 기록을 충분히 찾지 못했습니다'}
             </div>
             <div style={{ fontSize: 28, lineHeight: 1.45, color: '#36322c' }}>
@@ -99,7 +108,27 @@ export default async function OpenGraphImage({ params }: OgImageProps) {
       </div>
     ),
     {
-      ...size
+      ...size,
+      fonts: [
+        {
+          name: 'ChosunSm',
+          data: chosunSm,
+          weight: 400,
+          style: 'normal'
+        },
+        {
+          name: 'ChosunKm',
+          data: chosunKm,
+          weight: 700,
+          style: 'normal'
+        },
+        {
+          name: 'ChosunCentennial',
+          data: chosunCentennial,
+          weight: 700,
+          style: 'normal'
+        }
+      ]
     }
   );
 }

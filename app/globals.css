@@ -2,14 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'ChosunSm';
+  src: url('/fonts/ChosunSm.TTF') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ChosunKm';
+  src: url('/fonts/ChosunKm.TTF') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ChosunCentennial';
+  src: url('/fonts/ChosunCentennial_ttf.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
-  --paper: #f5efe4;
-  --paper-top: #f3e8d2;
-  --paper-bottom: #e7d8bd;
-  --shell-top: #cab999;
-  --shell-bottom: #ae9c81;
+  --paper: #efefef;
+  --paper-top: #f4f4f4;
+  --paper-bottom: #e6e6e6;
+  --shell-top: #cfcfcf;
+  --shell-bottom: #acacac;
   --ink: #111111;
-  --muted-ink: #3f3b36;
+  --muted-ink: #3c3c3c;
   --tabloid-red: #cf1020;
   --tabloid-red-strong: #b40e1b;
   --accent-ink: #ffffff;
@@ -18,10 +42,10 @@
   --line-soft: rgba(17, 17, 17, 0.12);
   --frame-line: rgba(17, 17, 17, 0.15);
   --surface: rgba(255, 255, 255, 0.62);
-  --surface-alt: #f1e3c4;
-  --surface-alt-2: #f2e2c1;
-  --surface-muted: #ece0c8;
-  --surface-card: #f6eed7;
+  --surface-alt: #e3e3e3;
+  --surface-alt-2: #dfdfdf;
+  --surface-muted: #dcdcdc;
+  --surface-card: #e8e8e8;
   --surface-strong: rgba(17, 17, 17, 0.035);
   --surface-tag: rgba(255, 255, 255, 0.68);
   --banner: #111111;
@@ -30,27 +54,27 @@
   --banner-line: rgba(255, 255, 255, 0.15);
   --display-ghost: rgba(255, 255, 255, 0.16);
   --selection: rgba(169, 18, 18, 0.18);
-  --paper-edge: rgba(131, 100, 63, 0.08);
-  --paper-edge-strong: rgba(131, 100, 63, 0.1);
-  --paper-spot-a: rgba(124, 92, 50, 0.08);
-  --paper-spot-b: rgba(101, 74, 39, 0.08);
-  --paper-vignette: rgba(77, 55, 24, 0.05);
+  --paper-edge: rgba(78, 78, 78, 0.08);
+  --paper-edge-strong: rgba(78, 78, 78, 0.1);
+  --paper-spot-a: rgba(92, 92, 92, 0.07);
+  --paper-spot-b: rgba(70, 70, 70, 0.07);
+  --paper-vignette: rgba(54, 54, 54, 0.05);
   --paper-shadow-soft: rgba(0, 0, 0, 0.05);
-  --frame-shadow: rgba(33, 23, 10, 0.24);
-  --archive-spot-a: rgba(145, 109, 63, 0.08);
-  --archive-spot-b: rgba(122, 89, 48, 0.08);
-  --archive-vignette: rgba(80, 57, 27, 0.05);
-  --archive-shadow: rgba(108, 79, 44, 0.05);
+  --frame-shadow: rgba(22, 22, 22, 0.24);
+  --archive-spot-a: rgba(96, 96, 96, 0.06);
+  --archive-spot-b: rgba(74, 74, 74, 0.06);
+  --archive-vignette: rgba(58, 58, 58, 0.05);
+  --archive-shadow: rgba(68, 68, 68, 0.05);
   --photo-fill-start: rgba(17, 17, 17, 0.04);
   --photo-fill-end: rgba(17, 17, 17, 0.42);
   --photo-fallback-start: rgba(17, 17, 17, 0.16);
   --photo-fallback-end: rgba(17, 17, 17, 0.58);
   --photo-overlay-strong: rgba(17, 17, 17, 0.7);
   --photo-overlay-soft: rgba(17, 17, 17, 0.12);
-  --font-newspaper: var(--font-noto-serif-kr);
-  --font-display: var(--font-noto-serif-kr);
-  --font-tabloid: var(--font-noto-serif-kr);
-  --font-interface: var(--font-noto-serif-kr);
+  --font-newspaper: 'ChosunSm';
+  --font-display: 'ChosunCentennial';
+  --font-tabloid: 'ChosunKm';
+  --font-interface: 'ChosunSm';
 }
 
 * {
@@ -64,9 +88,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%),
-    linear-gradient(180deg, var(--shell-top) 0%, var(--shell-bottom) 100%);
+  background: linear-gradient(180deg, #cfcfcf 0%, #acacac 100%);
   color: var(--ink);
   font-family: var(--font-interface), serif;
   text-rendering: optimizeLegibility;
@@ -123,6 +145,12 @@ a {
   opacity: 0.14;
   content: '';
   pointer-events: none;
+}
+
+.page-shell {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%),
+    linear-gradient(180deg, var(--shell-top) 0%, var(--shell-bottom) 100%);
 }
 
 .archive-panel {

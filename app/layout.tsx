@@ -1,22 +1,7 @@
 import type { Metadata } from 'next';
-import localFont from 'next/font/local';
 import type { ReactNode } from 'react';
 import { KOREAN_SERVICE_NAME } from '@/lib/year';
 import './globals.css';
-
-const notoSerifKr = localFont({
-  src: [
-    {
-      path: '../public/fonts/NotoSerifKR[wght].ttf',
-      weight: '200 900',
-      style: 'normal'
-    }
-  ],
-  variable: '--font-noto-serif-kr',
-  display: 'swap',
-  preload: true,
-  fallback: ['Noto Serif', 'Source Han Serif KR', 'serif']
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://backthen.example'),
@@ -51,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${notoSerifKr.className} ${notoSerifKr.variable}`}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

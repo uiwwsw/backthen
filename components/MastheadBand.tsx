@@ -1,12 +1,24 @@
-import Link from 'next/link';
+import { MastheadTitleJump } from '@/components/MastheadTitleJump';
 
 type MastheadBandProps = {
   dateLabel: string;
   monthDayLabel: string;
   titleLabel: string;
+  currentYear: number;
+  currentYearsAgo: number;
+  minYearsAgo: number;
+  maxYearsAgo: number;
 };
 
-export function MastheadBand({ dateLabel, monthDayLabel, titleLabel }: MastheadBandProps) {
+export function MastheadBand({
+  dateLabel,
+  monthDayLabel,
+  titleLabel,
+  currentYear,
+  currentYearsAgo,
+  minYearsAgo,
+  maxYearsAgo
+}: MastheadBandProps) {
   return (
     <header className="border-b-4 border-ink pb-4">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink bg-[color:var(--banner)] px-4 py-2 text-[color:var(--banner-ink)] sm:px-5">
@@ -22,14 +34,14 @@ export function MastheadBand({ dateLabel, monthDayLabel, titleLabel }: MastheadB
 
       <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-end">
         <div className="space-y-4">
-          <div className="border-y-[3px] border-ink py-4">
-            <Link
-              href="/"
-              className="block text-balance font-tabloid text-[clamp(2.3rem,6vw,4.8rem)] font-extrabold leading-[0.92] tracking-[-0.05em] text-ink"
-            >
-              {titleLabel}
-            </Link>
-          </div>
+          <MastheadTitleJump
+            currentYear={currentYear}
+            currentYearsAgo={currentYearsAgo}
+            maxYearsAgo={maxYearsAgo}
+            minYearsAgo={minYearsAgo}
+            monthDayLabel={monthDayLabel}
+            titleLabel={titleLabel}
+          />
           <div className="flex flex-wrap items-center gap-3 font-tabloid text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-ink">
             <span>{monthDayLabel} 기록면</span>
             <span className="h-3 border-l border-line" />

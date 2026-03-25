@@ -25,4 +25,4 @@ BackThen (`그해 오늘`) is a single-page archival newspaper front page built 
 
 ## Font
 
-Drop the licensed Chosun Ilbo-style font into `public/fonts/` and update the filename in `app/globals.css`.
+This project uses three local Chosun fonts from `public/fonts/`.

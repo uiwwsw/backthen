@@ -6,6 +6,6 @@
       <feFuncA type="table" tableValues="0 0.09"/>
     </feComponentTransfer>
   </filter>
-  <rect width="240" height="240" fill="#EFE4D0"/>
+  <rect width="240" height="240" fill="transparent"/>
   <rect width="240" height="240" filter="url(#n)" opacity="0.75"/>
 </svg>

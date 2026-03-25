@@ -66,11 +66,6 @@ export function getSourceLabel(sourceName: SourceName, sourceUrl?: string) {
   }
 }
 
-export function getSourceWebAddress(url: string) {
-  try {
-    const target = new URL(url);
-    return `${target.origin}${target.pathname}${target.search}`;
-  } catch {
-    return url;
-  }
+export function getSourceLinkLabel(sourceName: SourceName, sourceUrl?: string) {
+  return `${getSourceLabel(sourceName, sourceUrl)} 원문 보기`;
 }

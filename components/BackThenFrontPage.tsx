@@ -7,7 +7,7 @@ import type { IssueOfDay } from '@/lib/db/types';
 import type { SeoulDate } from '@/lib/date';
 import { formatPublishedAt, getSourceLabel, toKoreanDateLabel, toMonthDayLabel } from '@/lib/date';
 import { sanitizeIssueSummary } from '@/lib/news/summarizeIssue';
-import { getResolvedYearsAgoTitle, KOREAN_SERVICE_NAME } from '@/lib/year';
+import { getMaxYearsAgo, getResolvedYearsAgoTitle, KOREAN_SERVICE_NAME, MIN_YEARS_AGO } from '@/lib/year';
 
 type EmptyStateCopy = {
   eyebrow: string;
@@ -47,10 +47,18 @@ export function BackThenFrontPage({
   const titleLabel = issue ? getResolvedYearsAgoTitle(currentYearsAgo) : KOREAN_SERVICE_NAME;
 
   return (
-    <main className="min-h-screen px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4" style={themeStyle}>
+    <main className="page-shell min-h-screen px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4" style={themeStyle}>
       <div className="paper-frame mx-auto min-h-[calc(100vh-1rem)] max-w-[1720px] border border-[color:var(--frame-line)] sm:min-h-[calc(100vh-1.5rem)]">
         <div className="relative z-10 flex min-h-[calc(100vh-1rem)] flex-col px-3 py-3 sm:min-h-[calc(100vh-1.5rem)] sm:px-5 sm:py-5 lg:px-8 lg:py-7">
-          <MastheadBand dateLabel={dateLabel} monthDayLabel={monthDayLabel} titleLabel={titleLabel} />
+          <MastheadBand
+            currentYear={today.year}
+            currentYearsAgo={currentYearsAgo}
+            dateLabel={dateLabel}
+            maxYearsAgo={getMaxYearsAgo(today.year)}
+            minYearsAgo={MIN_YEARS_AGO}
+            monthDayLabel={monthDayLabel}
+            titleLabel={titleLabel}
+          />
 
           <div className="mt-4 grid flex-1 gap-5 xl:grid-cols-[minmax(0,1.48fr)_minmax(280px,0.48fr)] xl:gap-6">
             <section className="min-w-0">
