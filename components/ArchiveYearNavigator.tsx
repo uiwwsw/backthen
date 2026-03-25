@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useYearNavigation } from '@/components/useYearNavigation';
+import { MIN_YEAR } from '@/lib/year';
 
 type ArchiveYearNavigatorProps = {
   activeYear: number;
   currentYear: number;
+  monthDay: string;
   monthDayLabel: string;
   availableYears: number[];
 };
@@ -36,7 +38,8 @@ function getRandomIndex(length: number) {
 function buildNavigationCards(
   activeYear: number,
   availableYears: number[],
-  monthDayLabel: string
+  monthDayLabel: string,
+  canSearchRandomYear: boolean
 ): { cards: NavigationCard[]; randomYears: number[] } {
   const sortedYears = Array.from(new Set(availableYears)).sort((left, right) => left - right);
   const previousYear = sortedYears.filter((year) => year < activeYear).at(-1) ?? null;
@@ -56,11 +59,11 @@ function buildNavigationCards(
       {
         id: 'random',
         eyebrow: '임의 탐색',
-        value: randomYears.length ? '임의' : '없음',
-        description: randomYears.length
-          ? `현재 판을 제외한 ${randomYears.length}개 해 중 하나로 바로 이동합니다.`
-          : '이 날짜에 이동할 다른 확인 연도가 없습니다.',
-        helper: randomYears.length ? '확인된 연도만 무작위 선택' : '후보 없음',
+        value: canSearchRandomYear ? '임의' : '없음',
+        description: canSearchRandomYear
+          ? '현재 판을 제외한 이동 가능한 해 전체에서 무작위로 한 판을 고릅니다.'
+          : '이 서비스 범위에서 이동할 다른 해가 없습니다.',
+        helper: canSearchRandomYear ? '가능 연도 전체 무작위' : '후보 없음',
         targetYear: null
       },
       {
@@ -79,13 +82,18 @@ function buildNavigationCards(
 export function ArchiveYearNavigator({
   activeYear,
   currentYear,
+  monthDay,
   monthDayLabel,
   availableYears
 }: ArchiveYearNavigatorProps) {
   const { goToYearsAgo, isNavigating, pendingYearsAgo } = useYearNavigation();
+  const [isResolvingRandom, setIsResolvingRandom] = useState(false);
   const [pendingCardId, setPendingCardId] = useState<NavigationCard['id'] | null>(null);
+  const [randomUnavailable, setRandomUnavailable] = useState(false);
   const sortedYears = Array.from(new Set(availableYears)).sort((left, right) => left - right);
-  const { cards, randomYears } = buildNavigationCards(activeYear, sortedYears, monthDayLabel);
+  const canSearchRandomYear = currentYear > MIN_YEAR;
+  const { cards, randomYears } = buildNavigationCards(activeYear, sortedYears, monthDayLabel, canSearchRandomYear);
+  const isBusy = isNavigating || isResolvingRandom;
 
   const navigateToYear = (targetYear: number | null, cardId: NavigationCard['id']) => {
     if (targetYear === null) {
@@ -96,13 +104,44 @@ export function ArchiveYearNavigator({
     goToYearsAgo(currentYear - targetYear);
   };
 
-  const navigateRandom = () => {
-    if (!randomYears.length) {
+  const navigateRandom = async () => {
+    if (!canSearchRandomYear) {
       return;
     }
 
-    const targetYear = randomYears[getRandomIndex(randomYears.length)] ?? null;
-    navigateToYear(targetYear, 'random');
+    setPendingCardId('random');
+    setRandomUnavailable(false);
+    setIsResolvingRandom(true);
+
+    let targetYear: number | null = null;
+
+    try {
+      const response = await fetch(
+        `/api/random-year?monthDay=${encodeURIComponent(monthDay)}&activeYear=${encodeURIComponent(String(activeYear))}`,
+        {
+          cache: 'no-store'
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to resolve a random archive year.');
+      }
+
+      const payload = (await response.json()) as { year?: number | null };
+      targetYear = typeof payload.year === 'number' ? payload.year : null;
+    } catch {
+      targetYear = randomYears[getRandomIndex(randomYears.length)] ?? null;
+    } finally {
+      setIsResolvingRandom(false);
+    }
+
+    if (targetYear !== null) {
+      navigateToYear(targetYear, 'random');
+      return;
+    }
+
+    setPendingCardId(null);
+    setRandomUnavailable(true);
   };
 
   return (
@@ -145,18 +184,27 @@ export function ArchiveYearNavigator({
         <div className="relative mt-5 space-y-3">
           {cards.map((card) => {
             const isRandomCard = card.id === 'random';
-            const isEnabled = isRandomCard ? randomYears.length > 0 : card.targetYear !== null;
+            const displayCard =
+              isRandomCard && randomUnavailable
+                ? {
+                    ...card,
+                    value: '없음',
+                    description: '이 날짜에 이동할 다른 확인 연도를 찾지 못했습니다.',
+                    helper: '후보 없음'
+                  }
+                : card;
+            const isEnabled = isRandomCard ? canSearchRandomYear && !randomUnavailable : card.targetYear !== null;
             const isPending = isEnabled && pendingYearsAgo !== null && pendingCardId === card.id;
 
             return (
               <button
                 key={card.id}
                 className="group relative min-h-[112px] w-full overflow-hidden border-2 border-ink bg-[color:var(--surface-tag)] p-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:-translate-y-[1px] hover:bg-white/70 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:bg-[color:var(--surface-tag)]"
-                disabled={!isEnabled || isNavigating}
+                disabled={!isEnabled || isBusy}
                 type="button"
                 onClick={() => {
                   if (isRandomCard) {
-                    navigateRandom();
+                    void navigateRandom();
                     return;
                   }
 
@@ -172,17 +220,21 @@ export function ArchiveYearNavigator({
 
                 <div className="relative flex h-full flex-col justify-between gap-4">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">{card.eyebrow}</p>
+                    <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">
+                      {displayCard.eyebrow}
+                    </p>
                     <span className="font-tabloid text-[9px] font-semibold uppercase tracking-[0.24em] text-ink/60">
-                      {isPending ? '판 여는 중' : card.helper}
+                      {isPending || (isRandomCard && isResolvingRandom) ? '판 찾는 중' : displayCard.helper}
                     </span>
                   </div>
 
                   <div className="space-y-2">
                     <p className="font-display text-[2.35rem] font-extrabold leading-none tracking-[-0.06em] text-ink">
-                      {card.value}
+                      {displayCard.value}
                     </p>
-                    <p className="hangul-keep max-w-[17rem] font-sans text-[0.8rem] leading-5 text-ink/76">{card.description}</p>
+                    <p className="hangul-keep max-w-[17rem] font-sans text-[0.8rem] leading-5 text-ink/76">
+                      {displayCard.description}
+                    </p>
                   </div>
                 </div>
               </button>
