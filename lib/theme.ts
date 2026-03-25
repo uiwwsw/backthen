@@ -324,7 +324,7 @@ function buildThemePalette(sample: PaletteSample): ThemePalette {
   const mutedInk = tuneMutedInk(mixRgb(ink, DEFAULT_MUTED_INK, 0.42), paperBase);
   const accentStrong = withLightness(accent, clamp(rgbToHsl(accent).l - 0.09, 0.22, 0.46));
   const bannerInk = pickReadableForeground(banner, WHITE, paperBase);
-  const accentInk = pickReadableForeground(accent, WHITE, ink);
+  const accentInk = pickChipInk(accent, accentStrong);
   const shellTop = mixRgb(paperBottom, banner, 0.18);
   const shellBottom = mixRgb(paperBottom, banner, 0.3);
   const surfaceTint = mixRgb(paperTop, accent, 0.035);
@@ -525,6 +525,25 @@ function isEarthTone(color: HslColor) {
 
 function pickReadableForeground(background: RgbColor, light: RgbColor, dark: RgbColor) {
   return contrastRatio(light, background) >= 4.5 ? light : dark;
+}
+
+function pickChipInk(accent: RgbColor, accentStrong: RgbColor) {
+  const whiteScore = Math.min(contrastRatio(WHITE, accent), contrastRatio(WHITE, accentStrong));
+  const darkScore = Math.min(contrastRatio(DEFAULT_INK, accent), contrastRatio(DEFAULT_INK, accentStrong));
+
+  if (whiteScore >= 4.5 && darkScore >= 4.5) {
+    return whiteScore >= darkScore ? WHITE : DEFAULT_INK;
+  }
+
+  if (whiteScore >= 4.5) {
+    return WHITE;
+  }
+
+  if (darkScore >= 4.5) {
+    return DEFAULT_INK;
+  }
+
+  return whiteScore >= darkScore ? WHITE : DEFAULT_INK;
 }
 
 function rgbToHsl({ r, g, b }: RgbColor): HslColor {

@@ -202,11 +202,11 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
         </div>
 
         <div className="space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-          <h1 className="hangul-keep text-balance max-w-none font-tabloid text-[clamp(2.35rem,6.1vw,5.15rem)] font-extrabold leading-[0.92] tracking-[-0.03em] text-ink">
+          <h1 className="hangul-keep text-balance max-w-none font-tabloid text-[clamp(2.9rem,7.4vw,6.45rem)] font-extrabold leading-[0.86] tracking-[-0.045em] text-ink">
             {issue.headline}
           </h1>
 
-          <p className="hangul-keep max-w-5xl border-l-4 border-tabloid-red pl-4 font-sans text-[clamp(1.05rem,1.9vw,1.42rem)] leading-[1.56] text-muted-ink">
+          <p className="hangul-keep max-w-5xl border-l-4 border-tabloid-red pl-4 font-sans text-[clamp(0.98rem,1.45vw,1.2rem)] leading-[1.68] text-muted-ink">
             {lede}
           </p>
 
@@ -216,7 +216,7 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
                 {displayBodyParagraphs.map((paragraph, index) => (
                   <p
                     key={`body-${index}`}
-                    className="hangul-keep font-sans text-[0.98rem] leading-7 text-ink/88"
+                    className="hangul-keep font-sans text-[1.01rem] leading-[1.9] text-ink/88"
                   >
                     {paragraph}
                   </p>
@@ -236,13 +236,13 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
             <div className="space-y-4 border-t-2 border-ink pt-4 lg:border-l-2 lg:border-t-0 lg:pl-6 lg:pt-0">
               <div className="space-y-2">
                 <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-ink">기록 출처</p>
-                <p className="hangul-keep font-sans text-[0.95rem] leading-6 text-ink">{sourceLabel}</p>
-                <p className="hangul-keep font-sans text-[0.88rem] leading-6 text-ink/76">{publishedLabel}</p>
+                <p className="hangul-keep font-sans text-[0.88rem] leading-6 text-ink">{sourceLabel}</p>
+                <p className="hangul-keep font-sans text-[0.8rem] leading-6 text-ink/76">{publishedLabel}</p>
               </div>
 
               <div className="space-y-2 border-t border-ink/12 pt-4">
                 <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-ink">사진 자료</p>
-                <p className="hangul-keep font-sans text-[0.88rem] leading-6 text-ink/82">
+                <p className="hangul-keep font-sans text-[0.8rem] leading-6 text-ink/82">
                   {issue.backgroundImageCredit ?? '확인된 사진 자료 없음'}
                 </p>
               </div>

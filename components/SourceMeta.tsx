@@ -38,19 +38,19 @@ export function SourceMeta({ issue }: SourceMetaProps) {
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="border border-ink/15 bg-[color:var(--surface-strong)] p-3">
             <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">발행 매체</p>
-            <p className="mt-3 hangul-keep font-sans text-[0.98rem] leading-6 text-ink">{sourceLabel}</p>
+            <p className="mt-3 hangul-keep font-sans text-[0.9rem] leading-6 text-ink">{sourceLabel}</p>
           </div>
 
           <div className="border border-ink/15 bg-[color:var(--surface-strong)] p-3">
             <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">게재 시각</p>
-            <p className="mt-3 hangul-keep font-sans text-[0.98rem] leading-6 text-ink">{publishedLabel}</p>
+            <p className="mt-3 hangul-keep font-sans text-[0.9rem] leading-6 text-ink">{publishedLabel}</p>
           </div>
         </div>
 
         <div className="space-y-2 border-t-2 border-ink pt-4">
           <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">원문 링크</p>
           <a
-            className="block font-sans text-[0.94rem] leading-7 text-ink underline-offset-4 transition hover:underline"
+            className="block font-sans text-[0.88rem] leading-7 text-ink underline-offset-4 transition hover:underline"
             href={issue.sourceUrl}
             rel="noreferrer"
             target="_blank"
@@ -61,7 +61,7 @@ export function SourceMeta({ issue }: SourceMetaProps) {
 
         <div className="space-y-2 border-t border-ink/12 pt-4">
           <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">사진 자료</p>
-          <p className="hangul-keep font-sans text-[0.94rem] leading-7 text-ink/88">
+          <p className="hangul-keep font-sans text-[0.86rem] leading-7 text-ink/88">
             {getImageStatusLabel(issue.imageStatus)}
             {issue.backgroundImageCredit ? ` · ${issue.backgroundImageCredit}` : ''}
           </p>
@@ -80,7 +80,7 @@ export function SourceMeta({ issue }: SourceMetaProps) {
                 </span>
               ))
             ) : (
-              <p className="hangul-keep font-sans text-[0.9rem] leading-6 text-ink/78">주요어 정보 없음</p>
+              <p className="hangul-keep font-sans text-[0.84rem] leading-6 text-ink/78">주요어 정보 없음</p>
             )}
           </div>
         </div>

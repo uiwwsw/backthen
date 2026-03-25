@@ -126,7 +126,7 @@ export function MastheadTitleJump({
             setIsOpen(true);
           }}
         >
-          <span className="block text-balance font-display text-[clamp(2.3rem,6vw,4.8rem)] font-extrabold leading-[0.92] tracking-[-0.05em] text-ink transition group-hover:text-tabloid-red">
+          <span className="block text-balance font-display text-[clamp(1.85rem,4.4vw,3.75rem)] font-extrabold leading-[0.96] tracking-[-0.05em] text-ink transition group-hover:text-tabloid-red">
             {titleLabel}
           </span>
           <span className="mt-3 flex flex-wrap items-center gap-3 font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-ink">

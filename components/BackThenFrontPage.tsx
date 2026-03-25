@@ -89,7 +89,7 @@ export function BackThenFrontPage({
                       </div>
                       <div className="space-y-2">
                         <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">머리기사</p>
-                        <p className="hangul-keep text-balance font-tabloid text-[1.26rem] font-bold leading-[1.02] tracking-[-0.03em] text-ink">
+                        <p className="hangul-keep text-balance font-tabloid text-[1.08rem] font-bold leading-[1.1] tracking-[-0.02em] text-ink">
                           {issue.headline}
                         </p>
                       </div>
@@ -116,7 +116,7 @@ export function BackThenFrontPage({
                       {cleanedSummary ? (
                         <div className="grid grid-cols-[58px_minmax(0,1fr)] gap-3 border-t border-ink/12 pt-4">
                           <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-ink">리드</p>
-                          <p className="hangul-keep font-sans text-[0.9rem] leading-6 text-ink/86">{cleanedSummary}</p>
+                          <p className="hangul-keep font-sans text-[0.86rem] leading-6 text-ink/86">{cleanedSummary}</p>
                         </div>
                       ) : null}
                     </div>
@@ -137,7 +137,7 @@ export function BackThenFrontPage({
                                 {String(index + 1).padStart(2, '0')}
                               </span>
                               <div className="space-y-1">
-                                <p className="hangul-keep text-balance font-sans text-[0.9rem] leading-6 text-ink/88">{article.title}</p>
+                                <p className="hangul-keep text-balance font-sans text-[0.86rem] leading-6 text-ink/88">{article.title}</p>
                                 <p className="font-sans text-[0.8rem] leading-5 text-muted-ink">
                                   {getSourceLabel(article.sourceName, article.url)}
                                   {article.section ? ` · ${article.section}` : ''}

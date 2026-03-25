@@ -43,7 +43,7 @@ export function InsideArticles({ articles, primarySource }: InsideArticlesProps)
                   <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-ink">
                     신문 {String(index + 1).padStart(2, '0')}
                   </p>
-                  <p className="mt-2 font-tabloid text-[0.92rem] font-semibold uppercase tracking-[0.2em] text-ink">{sourceLabel}</p>
+                  <p className="mt-2 font-tabloid text-[0.84rem] font-semibold uppercase tracking-[0.2em] text-ink">{sourceLabel}</p>
                 </div>
                 {article?.section ? (
                   <span className="border border-ink/20 bg-[color:var(--surface-tag)] px-2 py-1 font-tabloid text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-ink">
@@ -54,29 +54,29 @@ export function InsideArticles({ articles, primarySource }: InsideArticlesProps)
 
               {article ? (
                 <a href={article.url} rel="noreferrer" target="_blank" className="mt-4 block">
-                  <h2 className="hangul-keep text-balance font-tabloid text-[1.45rem] font-bold leading-[1.02] tracking-[-0.02em] text-ink underline-offset-4 transition hover:underline">
+                  <h2 className="hangul-keep text-balance font-tabloid text-[1.28rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink underline-offset-4 transition hover:underline">
                     {article.title}
                   </h2>
                 </a>
               ) : (
-                <h2 className="mt-4 hangul-keep text-balance font-tabloid text-[1.45rem] font-bold leading-[1.02] tracking-[-0.02em] text-ink/55">
+                <h2 className="mt-4 hangul-keep text-balance font-tabloid text-[1.28rem] font-bold leading-[1.08] tracking-[-0.02em] text-ink/55">
                   기사 없음
                 </h2>
               )}
 
               {article ? (
                 summary ? (
-                  <p className="mt-4 flex-1 hangul-keep font-sans text-[0.93rem] leading-7 text-ink/86">{summary}</p>
+                  <p className="mt-4 flex-1 hangul-keep font-sans text-[0.88rem] leading-7 text-ink/86">{summary}</p>
                 ) : (
                   <div className="flex-1" />
                 )
               ) : (
-                <p className="mt-4 flex-1 hangul-keep font-sans text-[0.93rem] leading-7 text-ink/74">
+                <p className="mt-4 flex-1 hangul-keep font-sans text-[0.88rem] leading-7 text-ink/74">
                   이 날짜의 {sourceLabel} 기사를 확인하지 못했습니다.
                 </p>
               )}
 
-              <p className="mt-4 border-t border-ink/15 pt-3 font-sans text-[0.84rem] leading-6 text-muted-ink">
+              <p className="mt-4 border-t border-ink/15 pt-3 font-sans text-[0.78rem] leading-6 text-muted-ink">
                 출처 {sourceLabel}
                 {article?.publishedAt ? ` · ${formatPublishedAt(article.publishedAt)}` : null}
               </p>
