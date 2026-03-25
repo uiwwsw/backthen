@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { BackThenFrontPage } from '@/components/BackThenFrontPage';
 import { getTodayInSeoul, toKoreanDateLabel } from '@/lib/date';
 import { getAvailableIssueYears } from '@/lib/news/getAvailableIssueYears';
+import { getIssueContextImage } from '@/lib/news/getIssueContextImage';
 import { getOrCreateIssueOfThatDay } from '@/lib/news/getOrCreateIssueOfThatDay';
 import { getIssueThemePalette, getThemeStyle } from '@/lib/theme';
 import {
@@ -157,6 +158,7 @@ export default async function YearsAgoPage({ params }: YearsAgoPageProps) {
   if (parsedYearsAgo !== null && validateYearsAgo(parsedYearsAgo, today.year)) {
     const year = getYearFromYearsAgo(parsedYearsAgo, today.year);
     const issue = await getOrCreateIssueOfThatDay(year, today.monthDay);
+    const contextImage = issue ? await getIssueContextImage(issue) : null;
     const knownYears = await getAvailableIssueYears(today.monthDay, year, today.year);
     const availableIssueYears = issue
       ? Array.from(new Set([...knownYears, year])).sort((left, right) => left - right)
@@ -171,6 +173,7 @@ export default async function YearsAgoPage({ params }: YearsAgoPageProps) {
         currentYearsAgo={parsedYearsAgo}
         today={today}
         issue={issue}
+        contextImage={contextImage}
         themeStyle={themeStyle}
       />
     );

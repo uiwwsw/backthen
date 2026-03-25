@@ -1,7 +1,6 @@
 import { cache } from 'react';
-import { getEditorialOverride, getIssueRecord, storeIssueRecord, updateIssueVisual } from '@/lib/db/queries';
+import { getEditorialOverride, getIssueRecord, storeIssueRecord } from '@/lib/db/queries';
 import type { IssueOfDay } from '@/lib/db/types';
-import { searchBackgroundImage } from '@/lib/news/wikimediaImageSearch';
 import { crawlChosun } from '@/lib/sources/chosun';
 import { crawlDonga } from '@/lib/sources/donga';
 import { crawlJoongang } from '@/lib/sources/joongang';
@@ -20,7 +19,9 @@ function isStoredIssueValid(issue: IssueOfDay, requestedYear: number, requestedM
     return false;
   }
 
-  if (!issue.backgroundImageUrl && issue.sourceUrl.includes('/archive/newslibrary/view?idx=')) {
+  // Older rows may still store the Wikimedia fallback as the main preview image.
+  // Force a refresh so the preview reverts to the original article/page asset.
+  if (issue.imageStatus === 'licensed' || issue.imageStatus === 'public_domain') {
     return false;
   }
 
@@ -34,46 +35,11 @@ function isStoredIssueValid(issue: IssueOfDay, requestedYear: number, requestedM
   return `${year}-${month}-${day}` === `${requestedYear}-${requestedMonthDay}`;
 }
 
-async function enrichIssueVisual(issue: IssueOfDay, options?: { persist: boolean }) {
-  const searchedImage = await searchBackgroundImage({
-    title: issue.headline,
-    keywords: issue.keywords,
-    monthDay: issue.monthDay,
-    year: issue.year
-  });
-
-  if (!searchedImage) {
-    return issue;
-  }
-
-  const enrichedIssue = {
-    ...issue,
-    backgroundImageUrl: searchedImage.backgroundImageUrl,
-    backgroundImageCredit: searchedImage.backgroundImageCredit,
-    imageStatus: searchedImage.imageStatus
-  };
-
-  const hasVisualChanged =
-    issue.backgroundImageUrl !== enrichedIssue.backgroundImageUrl ||
-    issue.backgroundImageCredit !== enrichedIssue.backgroundImageCredit ||
-    issue.imageStatus !== enrichedIssue.imageStatus;
-
-  if (options?.persist && hasVisualChanged) {
-    try {
-      await updateIssueVisual(issue.year, issue.monthDay, searchedImage);
-    } catch {
-      return enrichedIssue;
-    }
-  }
-
-  return enrichedIssue;
-}
-
 export const getOrCreateIssueOfThatDay = cache(async (year: number, monthDay: string): Promise<IssueOfDay | null> => {
   const localOverride = getLocalEditorialOverride(year, monthDay);
 
   if (localOverride) {
-    return enrichIssueVisual(localOverride);
+    return localOverride;
   }
 
   let existing: IssueOfDay | null = null;
@@ -85,7 +51,7 @@ export const getOrCreateIssueOfThatDay = cache(async (year: number, monthDay: st
   }
 
   if (existing && isStoredIssueValid(existing, year, monthDay)) {
-    return enrichIssueVisual(existing, { persist: true });
+    return existing;
   }
 
   let override: IssueOfDay | null = null;
@@ -97,7 +63,7 @@ export const getOrCreateIssueOfThatDay = cache(async (year: number, monthDay: st
   }
 
   if (override) {
-    return enrichIssueVisual(override);
+    return override;
   }
 
   const { month, day } = toMonthDayParts(monthDay);
@@ -115,11 +81,7 @@ export const getOrCreateIssueOfThatDay = cache(async (year: number, monthDay: st
     return null;
   }
 
-  const visual = await resolveBackgroundImage(selection.primary, {
-    year,
-    monthDay,
-    keywords: selection.keywords
-  });
+  const visual = resolveBackgroundImage(selection.primary);
   const issue: IssueOfDay = {
     year,
     monthDay,

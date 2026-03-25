@@ -1,10 +1,13 @@
 import { HeadlineText } from '@/components/HeadlineText';
 import { InsideArticles } from '@/components/InsideArticles';
+import Image from 'next/image';
 import { formatPublishedAt, getSourceLabel, getSourceLinkLabel } from '@/lib/date';
 import type { IssueOfDay } from '@/lib/db/types';
+import type { IssueContextImage } from '@/lib/news/getIssueContextImage';
 import { sanitizeIssueSummary } from '@/lib/news/summarizeIssue';
 
 type LeadStoryProps = {
+  contextImage: IssueContextImage | null;
   issue: IssueOfDay;
   dateLabel: string;
   monthDayLabel: string;
@@ -67,7 +70,85 @@ function buildDisplayBodyParagraphs(paragraphs: string[]) {
   return blocks.map((block, index) => truncateCopy(block, index === 0 ? BODY_BLOCK_MAX_LENGTH : BODY_BLOCK_TARGET_LENGTH + 24));
 }
 
-export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
+function buildContextImageMeta(issue: IssueOfDay, contextImage: IssueContextImage | null, keywords: string[]) {
+  const placeholderKeywords = keywords.slice(0, 2);
+
+  if (contextImage?.searchState === 'match' && contextImage.imageUrl) {
+    return {
+      imageUrl: contextImage.imageUrl,
+      isMatch: true,
+      placeholderKeywords
+    };
+  }
+
+  return {
+    imageUrl: null,
+    isMatch: false,
+    placeholderKeywords
+  };
+}
+
+function ContextImageCard({
+  issue,
+  contextImage,
+  keywords,
+  className
+}: {
+  issue: IssueOfDay;
+  contextImage: IssueContextImage | null;
+  keywords: string[];
+  className?: string;
+}) {
+  const meta = buildContextImageMeta(issue, contextImage, keywords);
+  const imageFrameClass = 'relative h-[clamp(16rem,34vw,28rem)] max-h-[28rem] w-full overflow-hidden border border-ink';
+
+  return (
+    <figure className={className}>
+      <div className="border-2 border-ink bg-[color:var(--surface-card)] p-3 shadow-[0_18px_40px_rgba(17,17,17,0.08)]">
+        {meta.isMatch && meta.imageUrl ? (
+          <div className={imageFrameClass}>
+            <Image
+              alt={`${issue.headline} 관련 이미지`}
+              className="object-cover"
+              fill
+              sizes="(min-width: 1280px) 1100px, (min-width: 640px) 90vw, 100vw"
+              src={meta.imageUrl}
+            />
+          </div>
+        ) : (
+          <div className={`${imageFrameClass} bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.28),transparent_48%),linear-gradient(180deg,rgba(17,17,17,0.03),rgba(17,17,17,0.1))]`}>
+            <div className="absolute inset-0 bg-grain opacity-20 mix-blend-multiply" />
+            <div className="absolute left-4 top-4 inline-flex border border-ink/18 bg-white/30 px-3 py-1 font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-ink/52">
+              자료사진
+            </div>
+            <div className="relative flex h-full flex-col items-center justify-center px-8 text-center">
+              <p className="font-tabloid text-[clamp(4rem,10vw,7rem)] font-extrabold leading-none tracking-[-0.08em] text-ink/16">
+                {issue.year}
+              </p>
+              {meta.placeholderKeywords.length ? (
+                <p className="mt-4 hangul-keep font-sans text-[0.82rem] leading-6 tracking-[0.08em] text-ink/58">
+                  {meta.placeholderKeywords.join(' · ')}
+                </p>
+              ) : null}
+              <div className="mt-6 flex w-full max-w-[19rem] items-center gap-3 text-ink/18">
+                <span className="h-px flex-1 bg-current" />
+                <span className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.32em]">Archive</span>
+                <span className="h-px flex-1 bg-current" />
+              </div>
+              <div className="mt-3 space-y-2 opacity-28">
+                <div className="h-px w-28 bg-ink/60" />
+                <div className="h-px w-36 bg-ink/40" />
+                <div className="h-px w-24 bg-ink/30" />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </figure>
+  );
+}
+
+export function LeadStory({ contextImage, issue, dateLabel, monthDayLabel }: LeadStoryProps) {
   const keywords = issue.keywords.filter(Boolean).slice(0, 4);
   const sourceLabel = getSourceLabel(issue.sourceName, issue.sourceUrl);
   const publishedLabel = issue.publishedAt ? formatPublishedAt(issue.publishedAt) : dateLabel;
@@ -89,6 +170,7 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
         .slice(0, 2);
   const bodyParagraphs = buildDisplayBodyParagraphs(bodyCandidates.length ? bodyCandidates : [cleanedSummary || issue.summary]);
   const displayBodyParagraphs = bodyParagraphs.length ? bodyParagraphs : [cleanedSummary || issue.summary];
+  const previewCredit = issue.backgroundImageCredit ?? '기존 기사나 지면에서 확인된 이미지 없음';
   const leadVisualStyle = issue.backgroundImageUrl
     ? {
       backgroundImage: `linear-gradient(180deg, var(--photo-fill-start) 0%, var(--photo-fill-end) 100%), url(${issue.backgroundImageUrl})`
@@ -122,12 +204,12 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
               </div>
             ) : null}
             <div className="absolute left-4 top-4 inline-flex bg-tabloid-red px-3 py-1 font-tabloid text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--accent-ink)] sm:left-5 sm:top-5">
-              사진 자료
+              지면 미리보기
             </div>
             <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-4 border-t border-[color:var(--banner-line)] bg-gradient-to-t from-[color:var(--photo-overlay-strong)] via-[color:var(--photo-overlay-soft)] to-transparent px-4 py-3 text-[color:var(--banner-ink-muted)] sm:px-6">
-              <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.28em]">사진 설명</p>
+              <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.28em]">자료 출처</p>
               <p className="hangul-keep max-w-[70%] text-right font-sans text-[0.76rem] leading-5 sm:text-[0.83rem]">
-                {issue.backgroundImageCredit ?? '자료 사진 없음'}
+                {previewCredit}
               </p>
             </div>
           </div>
@@ -193,7 +275,7 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
         </div>
       </div>
 
-      <div className="border-2 border-ink bg-[color:var(--surface)] xl:flex xl:flex-[1_1_auto] xl:min-h-0 xl:flex-col">
+      <div className="border-2 border-ink bg-[color:var(--surface)]">
         <div className="flex flex-wrap items-center gap-3 border-b-2 border-ink px-4 py-3 sm:px-5">
           <span className="bg-tabloid-red px-3 py-1 font-tabloid text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--accent-ink)]">
             머리기사
@@ -202,16 +284,23 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
           <span className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-ink">{publishedLabel}</span>
         </div>
 
-        <div className="space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:flex xl:flex-1 xl:min-h-0 xl:flex-col xl:gap-5 xl:space-y-0">
+        <div className="space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
           <h1 className="headline-wrap text-balance max-w-none font-tabloid text-[clamp(2.9rem,7.4vw,6.45rem)] font-extrabold leading-[0.86] tracking-[-0.045em] text-ink">
             <HeadlineText text={issue.headline} />
           </h1>
 
-          <p className="!mt-auto pt-2 hangul-keep max-w-5xl border-l-4 border-tabloid-red pl-4 font-sans text-[clamp(0.98rem,1.45vw,1.2rem)] leading-[1.68] text-muted-ink">
+          <ContextImageCard
+            className="w-full"
+            contextImage={contextImage}
+            issue={issue}
+            keywords={keywords}
+          />
+
+          <p className="hangul-keep max-w-5xl border-l-4 border-tabloid-red pl-4 font-sans text-[clamp(0.98rem,1.45vw,1.2rem)] leading-[1.68] text-muted-ink">
             {lede}
           </p>
 
-          <div className="grid gap-5 border-t-4 border-ink pt-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:gap-6 xl:mt-auto xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
+          <div className="grid gap-5 border-t-4 border-ink pt-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
             <div className="min-w-0 lg:pr-2">
               <div className="max-w-3xl space-y-4">
                 {displayBodyParagraphs.map((paragraph, index) => (
@@ -242,9 +331,9 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
               </div>
 
               <div className="space-y-2 border-t border-ink/12 pt-4">
-                <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-ink">사진 자료</p>
+                <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-ink">지면 자료</p>
                 <p className="hangul-keep font-sans text-[0.8rem] leading-6 text-ink/82">
-                  {issue.backgroundImageCredit ?? '확인된 사진 자료 없음'}
+                  {previewCredit}
                 </p>
               </div>
 
@@ -272,7 +361,7 @@ export function LeadStory({ issue, dateLabel, monthDayLabel }: LeadStoryProps) {
 
       <InsideArticles
         articles={issue.secondaryArticles}
-        className="xl:min-h-[260px] xl:flex-[0.78_1_0%]"
+        className="flex-auto"
         primarySource={issue.sourceName}
       />
     </article>

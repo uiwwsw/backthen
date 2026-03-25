@@ -27,19 +27,22 @@ export function InsideArticles({ articles, className, primarySource }: InsideArt
     }));
 
   return (
-    <section className={`flex h-full flex-col border-2 border-ink bg-[color:var(--surface)] ${className ?? ''}`.trim()}>
+    <section className={`flex min-h-0 flex-col border-2 border-ink bg-[color:var(--surface)] ${className ?? ''}`.trim()}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink bg-[color:var(--banner)] px-4 py-3 text-[color:var(--banner-ink)] sm:px-5">
         <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em]">다른 신문 기사</p>
         <p className="font-tabloid text-[11px] font-semibold uppercase tracking-[0.3em] text-[color:var(--banner-ink-muted)]">조중동 지면</p>
       </div>
 
-      <div className="grid flex-1 gap-4 p-4 sm:p-5 lg:grid-cols-2 lg:auto-rows-fr">
+      <div className="grid min-h-0 flex-1 gap-4 p-4 sm:p-5 lg:grid-cols-2 lg:auto-rows-fr">
         {slots.map(({ source, article }, index) => {
           const sourceLabel = getSourceLabel(source, article?.url);
           const summary = article ? getArticleSummary(article) : null;
 
           return (
-            <article key={`${source}-${article?.url ?? 'empty'}`} className="flex min-w-0 h-full flex-col border-2 border-ink bg-[color:var(--surface-card)] p-4">
+            <article
+              key={`${source}-${article?.url ?? 'empty'}`}
+              className="flex min-h-0 min-w-0 flex-col border-2 border-ink bg-[color:var(--surface-card)] p-4 lg:h-full"
+            >
               <div className="flex flex-wrap items-start justify-between gap-3 border-b border-ink/20 pb-3">
                 <div>
                   <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-ink">
@@ -66,19 +69,19 @@ export function InsideArticles({ articles, className, primarySource }: InsideArt
                 </h2>
               )}
 
-              {article ? (
-                summary ? (
-                  <p className="mt-4 flex-1 hangul-keep font-sans text-[0.88rem] leading-7 text-ink/86">{summary}</p>
+              <div className="mt-4 flex-1 min-h-0">
+                {article ? (
+                  summary ? (
+                    <p className="hangul-keep font-sans text-[0.88rem] leading-7 text-ink/86">{summary}</p>
+                  ) : null
                 ) : (
-                  <div className="flex-1" />
-                )
-              ) : (
-                <p className="mt-4 flex-1 hangul-keep font-sans text-[0.88rem] leading-7 text-ink/74">
-                  이 날짜의 {sourceLabel} 기사를 확인하지 못했습니다.
-                </p>
-              )}
+                  <p className="hangul-keep font-sans text-[0.88rem] leading-7 text-ink/74">
+                    이 날짜의 {sourceLabel} 기사를 확인하지 못했습니다.
+                  </p>
+                )}
+              </div>
 
-              <p className="mt-4 border-t border-ink/15 pt-3 font-sans text-[0.78rem] leading-6 text-muted-ink">
+              <p className="mt-auto border-t border-ink/15 pt-3 font-sans text-[0.78rem] leading-6 text-muted-ink">
                 출처 {sourceLabel}
                 {article?.publishedAt ? ` · ${formatPublishedAt(article.publishedAt)}` : null}
               </p>

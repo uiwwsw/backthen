@@ -8,6 +8,7 @@ import type { CSSProperties } from 'react';
 import type { IssueOfDay } from '@/lib/db/types';
 import type { SeoulDate } from '@/lib/date';
 import { formatPublishedAt, getSourceLabel, toKoreanDateLabel, toMonthDayLabel } from '@/lib/date';
+import type { IssueContextImage } from '@/lib/news/getIssueContextImage';
 import { sanitizeIssueSummary } from '@/lib/news/summarizeIssue';
 import { getMaxYearsAgo, getResolvedYearsAgoTitle, KOREAN_SERVICE_NAME, MIN_YEARS_AGO } from '@/lib/year';
 
@@ -23,6 +24,7 @@ type BackThenFrontPageProps = {
   currentYearsAgo: number;
   today: SeoulDate;
   issue: IssueOfDay | null;
+  contextImage?: IssueContextImage | null;
   themeStyle?: CSSProperties;
   emptyState?: EmptyStateCopy;
 };
@@ -39,6 +41,7 @@ export function BackThenFrontPage({
   currentYearsAgo,
   today,
   issue,
+  contextImage = null,
   themeStyle,
   emptyState = defaultEmptyState
 }: BackThenFrontPageProps) {
@@ -67,7 +70,7 @@ export function BackThenFrontPage({
           <div className="mt-4 grid flex-1 min-h-0 gap-5 xl:grid-cols-[minmax(0,1.48fr)_minmax(280px,0.48fr)] xl:gap-6">
             <section className="min-w-0 xl:min-h-0">
               {issue ? (
-                <LeadStory dateLabel={dateLabel} issue={issue} monthDayLabel={monthDayLabel} />
+                <LeadStory contextImage={contextImage} dateLabel={dateLabel} issue={issue} monthDayLabel={monthDayLabel} />
               ) : (
                 <ArchiveEmptyState eyebrow={emptyState.eyebrow} title={emptyState.title} body={emptyState.body} />
               )}
@@ -178,7 +181,6 @@ export function BackThenFrontPage({
                   activeYear={year}
                   availableYears={availableIssueYears}
                   currentYear={today.year}
-                  monthDay={today.monthDay}
                   monthDayLabel={monthDayLabel}
                 />
               ) : null}

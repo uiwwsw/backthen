@@ -1,29 +1,13 @@
 import type { IssueOfDay } from '@/lib/db/types';
 import { formatPublishedAt, getSourceLabel, getSourceLinkLabel } from '@/lib/date';
-
 type SourceMetaProps = {
   issue: IssueOfDay;
 };
 
-function getImageStatusLabel(imageStatus: IssueOfDay['imageStatus']) {
-  switch (imageStatus) {
-    case 'licensed':
-      return '기사 사진';
-    case 'public_domain':
-      return '공개 이미지';
-    case 'generated':
-      return '재구성 이미지';
-    case 'none':
-      return '사진 자료 없음';
-    case 'unknown':
-    default:
-      return '사진 자료';
-  }
-}
-
 export function SourceMeta({ issue }: SourceMetaProps) {
   const sourceLabel = getSourceLabel(issue.sourceName, issue.sourceUrl);
   const publishedLabel = issue.publishedAt ? formatPublishedAt(issue.publishedAt) : '발행 시각 정보 없음';
+  const previewCredit = issue.backgroundImageCredit ?? '기존 기사나 지면에서 확인된 이미지 없음';
 
   return (
     <section className="archive-panel border-2 border-ink text-sm text-muted-ink">
@@ -60,10 +44,9 @@ export function SourceMeta({ issue }: SourceMetaProps) {
         </div>
 
         <div className="space-y-2 border-t border-ink/12 pt-4">
-          <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">사진 자료</p>
+          <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">지면 자료</p>
           <p className="hangul-keep font-sans text-[0.86rem] leading-7 text-ink/88">
-            {getImageStatusLabel(issue.imageStatus)}
-            {issue.backgroundImageCredit ? ` · ${issue.backgroundImageCredit}` : ''}
+            {previewCredit}
           </p>
         </div>
 
