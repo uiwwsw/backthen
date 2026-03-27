@@ -181,6 +181,7 @@ export function BackThenFrontPage({
                   activeYear={year}
                   availableYears={availableIssueYears}
                   currentYear={today.year}
+                  monthDay={today.monthDay}
                   monthDayLabel={monthDayLabel}
                 />
               ) : null}

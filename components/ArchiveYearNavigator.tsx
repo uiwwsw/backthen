@@ -6,6 +6,7 @@ import { useYearNavigation } from '@/components/useYearNavigation';
 type ArchiveYearNavigatorProps = {
   activeYear: number;
   currentYear: number;
+  monthDay: string;
   monthDayLabel: string;
   availableYears: number[];
 };
@@ -18,20 +19,6 @@ type NavigationCard = {
   targetYear: number | null;
   value: string;
 };
-
-function getRandomIndex(length: number) {
-  if (length <= 0) {
-    return 0;
-  }
-
-  if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
-    const values = new Uint32Array(1);
-    window.crypto.getRandomValues(values);
-    return values[0] % length;
-  }
-
-  return Math.floor(Math.random() * length);
-}
 
 function buildNavigationCards(
   activeYear: number,
@@ -86,13 +73,15 @@ function buildNavigationCards(
 export function ArchiveYearNavigator({
   activeYear,
   currentYear,
+  monthDay,
   monthDayLabel,
   availableYears
 }: ArchiveYearNavigatorProps) {
   const { goToYearsAgo, isNavigating, pendingYearsAgo } = useYearNavigation();
   const [pendingCardId, setPendingCardId] = useState<NavigationCard['id'] | null>(null);
   const { cards, randomYears } = buildNavigationCards(activeYear, availableYears, monthDayLabel);
-  const isBusy = isNavigating;
+  const isResolvingRandom = pendingCardId === 'random' && pendingYearsAgo === null;
+  const isBusy = isNavigating || isResolvingRandom;
 
   const navigateToYear = (targetYear: number | null, cardId: NavigationCard['id']) => {
     if (targetYear === null) {
@@ -103,13 +92,38 @@ export function ArchiveYearNavigator({
     goToYearsAgo(currentYear - targetYear);
   };
 
-  const navigateRandom = () => {
+  const navigateRandom = async () => {
     if (!randomYears.length) {
       return;
     }
 
-    const targetYear = randomYears[getRandomIndex(randomYears.length)] ?? null;
-    navigateToYear(targetYear, 'random');
+    setPendingCardId('random');
+
+    try {
+      const response = await fetch(
+        `/api/random-year?activeYear=${encodeURIComponent(String(activeYear))}&monthDay=${encodeURIComponent(monthDay)}`,
+        {
+          cache: 'no-store'
+        }
+      );
+
+      if (!response.ok) {
+        setPendingCardId(null);
+        return;
+      }
+
+      const payload = (await response.json()) as { year?: number | null };
+      const targetYear = typeof payload.year === 'number' ? payload.year : null;
+
+      if (targetYear === null) {
+        setPendingCardId(null);
+        return;
+      }
+
+      navigateToYear(targetYear, 'random');
+    } catch {
+      setPendingCardId(null);
+    }
   };
 
   if (!cards.length) {
@@ -143,7 +157,7 @@ export function ArchiveYearNavigator({
           {cards.map((card) => {
             const isRandomCard = card.id === 'random';
             const isEnabled = isRandomCard ? randomYears.length > 0 : card.targetYear !== null;
-            const isPending = isEnabled && pendingYearsAgo !== null && pendingCardId === card.id;
+            const isPending = isEnabled && pendingCardId === card.id;
 
             return (
               <button
@@ -153,7 +167,7 @@ export function ArchiveYearNavigator({
                 type="button"
                 onClick={() => {
                   if (isRandomCard) {
-                    navigateRandom();
+                    void navigateRandom();
                     return;
                   }
 
