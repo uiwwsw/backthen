@@ -190,29 +190,39 @@ a {
 
 @keyframes skeleton-shimmer {
   0% {
-    background-position: 200% 0;
+    transform: translate3d(-180%, 0, 0);
   }
 
   100% {
-    background-position: -200% 0;
+    transform: translate3d(220%, 0, 0);
   }
 }
 
 .skeleton-block {
   --skeleton-base: rgba(17, 17, 17, 0.08);
   --skeleton-highlight: rgba(255, 255, 255, 0.48);
+  position: relative;
+  overflow: hidden;
   border-radius: 0.18rem;
-  background:
-    linear-gradient(
-      90deg,
-      var(--skeleton-base) 0%,
-      color-mix(in srgb, var(--skeleton-base) 82%, white) 20%,
-      var(--skeleton-highlight) 38%,
-      color-mix(in srgb, var(--skeleton-base) 84%, white) 56%,
-      var(--skeleton-base) 100%
-    );
-  background-size: 220% 100%;
-  animation: skeleton-shimmer 1.5s linear infinite;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--skeleton-base) 92%, white), var(--skeleton-base));
+}
+
+.skeleton-block::after {
+  position: absolute;
+  inset: -1px auto -1px 0;
+  width: 42%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--skeleton-highlight) 38%, transparent) 18%,
+    var(--skeleton-highlight) 50%,
+    color-mix(in srgb, var(--skeleton-highlight) 38%, transparent) 82%,
+    transparent 100%
+  );
+  transform: translate3d(-180%, 0, 0);
+  animation: skeleton-shimmer 1.7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  content: '';
+  pointer-events: none;
 }
 
 .skeleton-block-inverse {
@@ -221,7 +231,7 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton-block {
+  .skeleton-block::after {
     animation-duration: 0.01ms;
     animation-iteration-count: 1;
   }
