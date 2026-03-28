@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { NavigationLoadingProvider } from '@/components/NavigationLoadingProvider';
 import { KOREAN_SERVICE_NAME } from '@/lib/year';
 import './globals.css';
 
@@ -36,7 +37,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <NavigationLoadingProvider>{children}</NavigationLoadingProvider>
+      </body>
     </html>
   );
 }

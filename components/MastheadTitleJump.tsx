@@ -32,7 +32,7 @@ export function MastheadTitleJump({
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogTitleId = useId();
   const dialogDescriptionId = useId();
-  const { goToYearsAgo, isNavigating, pendingYearsAgo } = useYearNavigation();
+  const { goToYearsAgo, isNavigating } = useYearNavigation();
   const resolvedCurrentYearsAgo =
     currentYearsAgo >= minYearsAgo && currentYearsAgo <= maxYearsAgo ? currentYearsAgo : null;
   const quickYears = buildQuickYears(maxYearsAgo, resolvedCurrentYearsAgo);
@@ -47,7 +47,6 @@ export function MastheadTitleJump({
   const isInRange = isNumeric && numericValue >= minYearsAgo && numericValue <= maxYearsAgo;
   const previewYearsAgo = isInRange ? numericValue : defaultYearsAgo;
   const previewYear = currentYear - previewYearsAgo;
-  const pendingYear = pendingYearsAgo !== null ? currentYear - pendingYearsAgo : null;
 
   useEffect(() => {
     setValue(String(defaultYearsAgo));
@@ -93,7 +92,12 @@ export function MastheadTitleJump({
   const navigateToYearsAgo = (yearsAgo: number) => {
     setError(null);
 
-    if (!goToYearsAgo(yearsAgo) && yearsAgo === resolvedCurrentYearsAgo) {
+    if (goToYearsAgo(yearsAgo)) {
+      setIsOpen(false);
+      return;
+    }
+
+    if (yearsAgo === resolvedCurrentYearsAgo) {
       setError('이미 보고 있는 판입니다.');
     }
   };
@@ -132,9 +136,9 @@ export function MastheadTitleJump({
           <span className="mt-3 flex flex-wrap items-center gap-3 font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-ink">
             <span>제호 클릭</span>
             <span className="h-3 border-l border-line" />
-            <span>{isNavigating ? '판 여는 중' : '판 이동 열기'}</span>
+            <span>판 이동 열기</span>
             <span className="h-3 border-l border-line" />
-            <span>{isNavigating ? '아카이브 확인 중' : '주소도 직접 수정 가능'}</span>
+            <span>주소도 직접 수정 가능</span>
           </span>
         </button>
       </div>
@@ -189,31 +193,6 @@ export function MastheadTitleJump({
                 submit();
               }}
             >
-              {isNavigating && pendingYear !== null ? (
-                <div
-                  aria-live="polite"
-                  className="border-2 border-ink bg-[color:var(--surface-muted)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">
-                        Loading Edition
-                      </p>
-                      <p className="mt-2 hangul-keep font-sans text-[1rem] leading-7 text-ink/88">
-                        {pendingYear}년 {monthDayLabel} 판을 불러오는 중입니다.
-                      </p>
-                    </div>
-                    <div className="inline-flex items-center gap-2 border border-ink bg-[color:var(--surface)] px-3 py-2 font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-ink">
-                      <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-tabloid-red" />
-                      불러오는 중
-                    </div>
-                  </div>
-                  <p className="mt-3 hangul-keep font-sans text-[0.9rem] leading-6 text-ink/72">
-                    신문 아카이브와 대표 기사를 다시 조합하고 있어 몇 초 걸릴 수 있습니다.
-                  </p>
-                </div>
-              ) : null}
-
               <div className="space-y-2" id={dialogDescriptionId}>
                 <p className="hangul-keep text-balance font-sans text-[1rem] leading-7 text-ink/84">
                   숫자만 입력하면 같은 날짜의 다른 해 기사로 바로 이동합니다. 원하면 주소창 맨 끝 숫자를 직접 바꿔도 됩니다.
@@ -295,7 +274,7 @@ export function MastheadTitleJump({
                   disabled={isNavigating}
                   type="submit"
                 >
-                  {isNavigating ? '여는 중' : '이동'}
+                  이동
                 </button>
               </div>
             </form>

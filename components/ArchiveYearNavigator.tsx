@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useNavigationLoading } from '@/components/NavigationLoadingProvider';
 import { useYearNavigation } from '@/components/useYearNavigation';
 
 type ArchiveYearNavigatorProps = {
@@ -77,10 +78,10 @@ export function ArchiveYearNavigator({
   monthDayLabel,
   availableYears
 }: ArchiveYearNavigatorProps) {
-  const { goToYearsAgo, isNavigating, pendingYearsAgo } = useYearNavigation();
-  const [pendingCardId, setPendingCardId] = useState<NavigationCard['id'] | null>(null);
+  const { startLoading, stopLoading } = useNavigationLoading();
+  const { goToYearsAgo, isNavigating } = useYearNavigation();
+  const [isResolvingRandom, setIsResolvingRandom] = useState(false);
   const { cards, randomYears } = buildNavigationCards(activeYear, availableYears, monthDayLabel);
-  const isResolvingRandom = pendingCardId === 'random' && pendingYearsAgo === null;
   const isBusy = isNavigating || isResolvingRandom;
 
   const navigateToYear = (targetYear: number | null, cardId: NavigationCard['id']) => {
@@ -88,8 +89,15 @@ export function ArchiveYearNavigator({
       return;
     }
 
-    setPendingCardId(cardId);
-    goToYearsAgo(currentYear - targetYear);
+    const didNavigate = goToYearsAgo(currentYear - targetYear);
+
+    if (cardId === 'random') {
+      setIsResolvingRandom(false);
+
+      if (!didNavigate) {
+        stopLoading();
+      }
+    }
   };
 
   const navigateRandom = async () => {
@@ -97,7 +105,8 @@ export function ArchiveYearNavigator({
       return;
     }
 
-    setPendingCardId('random');
+    setIsResolvingRandom(true);
+    startLoading();
 
     try {
       const response = await fetch(
@@ -108,7 +117,8 @@ export function ArchiveYearNavigator({
       );
 
       if (!response.ok) {
-        setPendingCardId(null);
+        setIsResolvingRandom(false);
+        stopLoading();
         return;
       }
 
@@ -116,13 +126,15 @@ export function ArchiveYearNavigator({
       const targetYear = typeof payload.year === 'number' ? payload.year : null;
 
       if (targetYear === null) {
-        setPendingCardId(null);
+        setIsResolvingRandom(false);
+        stopLoading();
         return;
       }
 
       navigateToYear(targetYear, 'random');
     } catch {
-      setPendingCardId(null);
+      setIsResolvingRandom(false);
+      stopLoading();
     }
   };
 
@@ -157,7 +169,6 @@ export function ArchiveYearNavigator({
           {cards.map((card) => {
             const isRandomCard = card.id === 'random';
             const isEnabled = isRandomCard ? randomYears.length > 0 : card.targetYear !== null;
-            const isPending = isEnabled && pendingCardId === card.id;
 
             return (
               <button
@@ -186,9 +197,7 @@ export function ArchiveYearNavigator({
                     <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">
                       {card.eyebrow}
                     </p>
-                    <span className="font-tabloid text-[9px] font-semibold uppercase tracking-[0.24em] text-ink/60">
-                      {isPending ? '이동 중' : card.helper}
-                    </span>
+                    <span className="font-tabloid text-[9px] font-semibold uppercase tracking-[0.24em] text-ink/60">{card.helper}</span>
                   </div>
 
                   <div className="space-y-2">

@@ -187,3 +187,42 @@ a {
   position: relative;
   z-index: 1;
 }
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-block {
+  --skeleton-base: rgba(17, 17, 17, 0.08);
+  --skeleton-highlight: rgba(255, 255, 255, 0.48);
+  border-radius: 0.18rem;
+  background:
+    linear-gradient(
+      90deg,
+      var(--skeleton-base) 0%,
+      color-mix(in srgb, var(--skeleton-base) 82%, white) 20%,
+      var(--skeleton-highlight) 38%,
+      color-mix(in srgb, var(--skeleton-base) 84%, white) 56%,
+      var(--skeleton-base) 100%
+    );
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.5s linear infinite;
+}
+
+.skeleton-block-inverse {
+  --skeleton-base: rgba(255, 255, 255, 0.14);
+  --skeleton-highlight: rgba(255, 255, 255, 0.34);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}

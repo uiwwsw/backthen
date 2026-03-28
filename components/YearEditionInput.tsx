@@ -11,7 +11,7 @@ type YearEditionInputProps = {
 };
 
 export function YearEditionInput({ currentYearsAgo, minYearsAgo, maxYearsAgo }: YearEditionInputProps) {
-  const { goToYearsAgo, isNavigating, pendingYearsAgo } = useYearNavigation();
+  const { goToYearsAgo, isNavigating } = useYearNavigation();
   const [value, setValue] = useState(String(currentYearsAgo));
   const [error, setError] = useState<string | null>(null);
   const previousYearsAgo = currentYearsAgo > minYearsAgo ? currentYearsAgo - 1 : null;
@@ -48,23 +48,6 @@ export function YearEditionInput({ currentYearsAgo, minYearsAgo, maxYearsAgo }: 
       </div>
 
       <div className="space-y-4 p-4">
-        {isNavigating && pendingYearsAgo !== null ? (
-          <div
-            aria-live="polite"
-            className="border border-ink bg-[color:var(--surface-muted)] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="hangul-keep font-sans text-[0.95rem] leading-6 text-ink/86">
-                /{pendingYearsAgo} 판을 불러오는 중입니다.
-              </p>
-              <div className="inline-flex items-center gap-2 font-tabloid text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-ink">
-                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-tabloid-red" />
-                Loading
-              </div>
-            </div>
-          </div>
-        ) : null}
-
         <div className="space-y-2">
           <p className="font-tabloid text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-ink">지금에서 얼마나 거슬러 갈까요</p>
           <p className="hangul-keep font-sans text-[0.9rem] leading-6 text-ink/78">입력값은 절대 연도가 아니라 지금 기준 몇 년 전인지입니다.</p>
@@ -97,7 +80,7 @@ export function YearEditionInput({ currentYearsAgo, minYearsAgo, maxYearsAgo }: 
               type="button"
               onClick={submit}
             >
-              {isNavigating ? '여는 중' : '이동'}
+              이동
             </button>
           </div>
         </div>
